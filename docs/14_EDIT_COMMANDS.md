@@ -15,6 +15,7 @@
 - 되돌리기(undo)가 가능해야 한다. 되돌릴 수 없는 명령(저장·내보내기·실행)은 문서를 바꾸지 않는다
 - 범위: "설비" = 머신빌더에서, "공장" = 팩토리빌더에서, "설비·공장" = 어디서든
 - 인자의 길이는 mm, 각도는 deg (지침서 5장). id 는 UUID v7
+- 구현 위치: `packages/engine/src/editor` — `applyCommand(문서, 명령)` 은 새 문서를 돌려주고(순수 함수), `MachineEditor.dispatch(명령)` 이 실행 취소·선택·실행 모드(force_tag)를 맡는다. 설비 범위 명령은 2단계 1차 묶음에서 구현(set_reference·load_glb·load_urdf·import_io 는 에셋 저장소가 생기는 묶음에서)
 
 ## 2. 명령 (54개)
 

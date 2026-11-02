@@ -110,3 +110,5 @@ export const BlockDef = z.object({
     .default(null),
 });
 export type BlockDef = z.infer<typeof BlockDef>;
+export type BlockDefInput = z.input<typeof BlockDef>;
+export type ParamDef = z.infer<typeof ParamDef>;

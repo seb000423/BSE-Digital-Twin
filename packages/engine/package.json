@@ -2,7 +2,7 @@
   "name": "@bse/engine",
   "version": "0.1.0",
   "private": true,
-  "description": "시뮬 엔진: 신호 테이블 · 기구학 · DES · 네비 (브라우저 Worker 와 서버 Worker 가 같은 코드)",
+  "description": "시뮬 엔진 + 편집기 코어 (브라우저 Worker와 서버 Worker가 같은 코드). 편집 명령 실행·설비 런타임(신호·기구학)",
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -14,6 +14,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@bse/blocks": "workspace:*",
     "@bse/schema": "workspace:*",
     "seedrandom": "^3.0.5"
   },

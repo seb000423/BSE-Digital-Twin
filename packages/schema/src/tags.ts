@@ -63,6 +63,7 @@ export function expandTagSet(kind: TagSetKind, nodePrefix: string): string[] {
 }
 
 export const TagBindingKind = z.enum(['joint', 'sensor', 'process', 'carrier', 'trajectory']);
+export type TagBindingKind = z.infer<typeof TagBindingKind>;
 
 export const IoEntry = z.object({
   tag: TagName,

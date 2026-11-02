@@ -47,6 +47,9 @@ importers:
 
   packages/engine:
     dependencies:
+      '@bse/blocks':
+        specifier: workspace:*
+        version: link:../blocks
       '@bse/schema':
         specifier: workspace:*
         version: link:../schema
