@@ -1,0 +1,123 @@
+/* BSE Studio 화면 토큰 — 디자인 가이드 04 §4·§9: 랜딩과 같은 남색 청사진 한 가지 테마 + 상태 색 3가지 */
+@import 'tailwindcss';
+
+@theme {
+  --color-bg: #0f2a45;
+  --color-paper: #16395c;
+  --color-glow: #1f4e7a;
+  --color-line: #cfe4f5;
+  --color-fg: #eef5fb;
+  --color-muted: #a3b9cd;
+  --color-dim: #6f8aa3;
+  --color-fill: #dcebf7;
+  --color-border: rgb(200 225 245 / 22%);
+  --color-ok: #5ad28a;
+  --color-warn: #f5b942;
+  --color-alarm: #ff6b6b;
+  --font-sans:
+    'Pretendard Variable', Pretendard, -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic',
+    sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --radius-sm: 2px;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  caret-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  color-scheme: dark;
+}
+input,
+select,
+button {
+  font: inherit;
+  color: inherit;
+  caret-color: var(--color-fg);
+}
+
+/* 공통 부품 */
+.btn {
+  @apply inline-flex items-center justify-center min-h-8 px-3 border border-border rounded-sm text-xs font-semibold bg-transparent cursor-pointer select-none;
+}
+.btn:hover {
+  background: var(--color-fill);
+  border-color: var(--color-fill);
+  color: var(--color-bg);
+}
+.btn[aria-pressed='true'],
+.btn-primary {
+  background: var(--color-fill);
+  border-color: var(--color-fill);
+  color: var(--color-bg);
+}
+.btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.seg {
+  @apply inline-flex border border-border rounded-sm overflow-hidden;
+}
+.seg > * {
+  @apply border-0 rounded-none bg-transparent text-muted px-3 min-h-7 text-xs font-semibold inline-flex items-center cursor-pointer;
+}
+.seg > * + * {
+  border-left: 1px solid var(--color-border);
+}
+.seg > [aria-pressed='true'],
+.seg > [data-state='on'],
+.seg > [data-state='active'] {
+  background: var(--color-fill);
+  color: var(--color-bg);
+}
+.panel-h {
+  @apply flex items-center gap-2 min-h-10 px-3 text-xs font-semibold text-muted border-b border-border;
+}
+.kv {
+  @apply grid gap-x-3 gap-y-1 text-xs;
+  grid-template-columns: 80px minmax(0, 1fr);
+}
+.kv span:nth-child(odd) {
+  color: var(--color-muted);
+}
+.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.dot {
+  @apply inline-block w-[7px] h-[7px] rounded-full align-middle mr-1.5;
+}
+.field {
+  @apply w-full min-h-7 px-2 border border-border rounded-sm bg-bg text-fg text-xs;
+}
+.field:focus-visible {
+  outline: 2px solid var(--color-fg);
+  outline-offset: 1px;
+}
+.tree-row {
+  @apply block w-full text-left px-3 py-1 text-xs border-0 bg-transparent cursor-pointer;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.tree-row[aria-current='true'] {
+  background: rgb(220 235 247 / 14%);
+}
+.tbl {
+  @apply w-full border-collapse text-xs;
+}
+.tbl th {
+  @apply text-left font-semibold text-muted px-3 h-8 border-b border-border;
+}
+.tbl td {
+  @apply px-3 h-8 whitespace-nowrap;
+  border-bottom: 1px solid rgb(200 225 245 / 12%);
+}

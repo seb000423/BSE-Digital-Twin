@@ -87,3 +87,4 @@ V2: G. Monitor(Evolve) 대시보드 · 공유 뷰어 · 변환(AAS/USD)
 - 색·글꼴·로딩 문구는 [04 디자인 가이드](04_DESIGN_GUIDE.md) (남색 단일 테마, 로딩 문구 어휘 6개)
 - 한국어 기본, 영어 UI는 V2. 1920×1080 기준, WebGL2 필수
 - 기존 `BSE_STUDIO/apps/web`(VEXPLOR 파생 AAS 도구)의 화면과 코드는 쓰지 않음. 빌더는 `BSE-Digital-Twin` 저장소의 `apps/`에 처음부터, AAS 변환은 IDTA 공식 라이브러리 + 우리 매핑, 현장 연결은 게이트웨이 방식 (D-31)
+- 구현 위치: `apps/web/src` — `screens/`(홈 B, 설비 편집기 C), `panels/`(팔레트·속성·아래 패널), `three/Viewport.tsx`(3D). 화면은 명령만 호출한다(`store.ts`의 `dispatch`). 2026-11-02 2단계 2차 묶음에서 C 화면 편집·실행 모드까지 구현, 비교 모드는 4단계

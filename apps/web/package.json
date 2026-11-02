@@ -1,0 +1,35 @@
+{
+  "name": "@bse/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "BSE Studio — 빌더 앱 (React 18 · Vite 5 · react-three-fiber · zustand · Tailwind · Radix). 화면은 편집 명령을 부르기만 한다",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@bse/blocks": "workspace:*",
+    "@bse/engine": "workspace:*",
+    "@bse/schema": "workspace:*",
+    "@react-three/drei": "9.122.0",
+    "@react-three/fiber": "8.18.0",
+    "radix-ui": "1.8.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "three": "0.170.0",
+    "zustand": "^5.0.16"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/react": "18.3.31",
+    "@types/react-dom": "18.3.7",
+    "@types/three": "0.170.0",
+    "@vitejs/plugin-react": "4.7.0",
+    "tailwindcss": "^4.3.3",
+    "vite": "5.4.21"
+  }
+}
