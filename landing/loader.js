@@ -375,13 +375,13 @@
 
   /* 첫 로딩의 진짜 할 일: 이 페이지가 실제로 받는 파일들만 ("마무리 중" 같은 꾸민 단계 없음). 파일이 도착하면(Resource Timing) 그 일이 끝난 것으로 표시 */
   var BOOT_TASKS = [
-    // 화면 문구는 세 가지뿐 (구성 / 에셋 / 시뮬). 어떤 파일·라이브러리를 쓰는지는 화면에 적지 않음
+    // 화면 문구는 세 가지뿐 (구성 / 에셋 / 화면 준비). 어떤 파일·라이브러리를 쓰는지는 화면에 적지 않음
     { id: 'style', ko: '구성 로딩 중', en: 'Loading setup', weight: 5, match: /style\.css/ },
     { id: 'font',  ko: '구성 로딩 중', en: 'Loading setup', weight: 10, match: /pretendard/i },
     { id: 'motion', ko: '에셋 로딩 중', en: 'Loading assets', weight: 10, match: /anime\.esm/ },
     { id: 'three', ko: '에셋 로딩 중', en: 'Loading assets', weight: 45, match: /three\.module/,
       url: 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js' },   // index.html의 importmap과 같은 주소여야 함
-    { id: 'scene', ko: '시뮬 로딩 중', en: 'Loading simulation', weight: 30 }
+    { id: 'scene', ko: '화면 준비 중', en: 'Preparing view', weight: 30 }
   ];
   function watchResources() {
     function seen(name) {
