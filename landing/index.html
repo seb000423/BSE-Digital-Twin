@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BSE : Digital Twin</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+    <link rel="stylesheet" href="style.css" />
+    <!-- Loading screen: the logo opens up while a light runs through its links (loader.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.umd.min.js"></script>
+    <script src="loader.js"></script>
+  </head>
+  <body>
+    <canvas id="bg" aria-hidden="true"></canvas>
+    <!-- Name labels on the parts of the drawing -->
+    <div class="labels" aria-hidden="true">
+      <span class="label" data-part="factory" data-name="Factory"></span>
+      <span class="label" data-part="cell" data-name="Work cell"></span>
+      <span class="label" data-part="robot" data-name="Robot cell"></span>
+    </div>
+    <header class="bar">
+      <span class="side"></span>
+      <a class="brand" href="index.html" data-title-ko="처음 화면으로" data-title-en="Back to start">
+        <!-- BSE mark: three Borromean triangles (each passes over one, under the other) around the B / S / E triangle -->
+        <svg class="logo" width="34" height="31" aria-hidden="true" viewBox="10 8 80 74"><defs><mask id="bse0" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100" fill="none"><path d="M53.4,21.0 L69.0,48.0 A4.0,4.0 0 0 1 65.5,54.0 L34.4,54.0 A4.0,4.0 0 0 1 30.9,48.0 L46.5,21.0 A4.0,4.0 0 0 1 53.4,21.0 Z" stroke="#fff" stroke-width="6"/><path d="M53.4,21.0 L69.0,48.0 A4.0,4.0 0 0 1 65.5,54.0 L34.4,54.0 A4.0,4.0 0 0 1 30.9,48.0 L46.5,21.0 A4.0,4.0 0 0 1 53.4,21.0 Z" stroke="#000" stroke-width="3.2"/><path d="M43.0,39.0 L58.6,66.0 A4.0,4.0 0 0 1 55.2,72.0 L24.0,72.0 A4.0,4.0 0 0 1 20.5,66.0 L36.1,39.0 A4.0,4.0 0 0 1 43.0,39.0 Z" stroke="#000" stroke-width="9.6"/><polygon points="50,38.5 64.3,63.2 35.7,63.2" fill="#000" stroke="#000" stroke-width="3" stroke-linejoin="round"/></mask><mask id="bse1" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100" fill="none"><path d="M63.8,39.0 L79.4,66.0 A4.0,4.0 0 0 1 75.9,72.0 L44.8,72.0 A4.0,4.0 0 0 1 41.3,66.0 L56.9,39.0 A4.0,4.0 0 0 1 63.8,39.0 Z" stroke="#fff" stroke-width="6"/><path d="M63.8,39.0 L79.4,66.0 A4.0,4.0 0 0 1 75.9,72.0 L44.8,72.0 A4.0,4.0 0 0 1 41.3,66.0 L56.9,39.0 A4.0,4.0 0 0 1 63.8,39.0 Z" stroke="#000" stroke-width="3.2"/><path d="M53.4,21.0 L69.0,48.0 A4.0,4.0 0 0 1 65.5,54.0 L34.4,54.0 A4.0,4.0 0 0 1 30.9,48.0 L46.5,21.0 A4.0,4.0 0 0 1 53.4,21.0 Z" stroke="#000" stroke-width="9.6"/><polygon points="50,38.5 64.3,63.2 35.7,63.2" fill="#000" stroke="#000" stroke-width="3" stroke-linejoin="round"/></mask><mask id="bse2" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100" fill="none"><path d="M43.0,39.0 L58.6,66.0 A4.0,4.0 0 0 1 55.2,72.0 L24.0,72.0 A4.0,4.0 0 0 1 20.5,66.0 L36.1,39.0 A4.0,4.0 0 0 1 43.0,39.0 Z" stroke="#fff" stroke-width="6"/><path d="M43.0,39.0 L58.6,66.0 A4.0,4.0 0 0 1 55.2,72.0 L24.0,72.0 A4.0,4.0 0 0 1 20.5,66.0 L36.1,39.0 A4.0,4.0 0 0 1 43.0,39.0 Z" stroke="#000" stroke-width="3.2"/><path d="M63.8,39.0 L79.4,66.0 A4.0,4.0 0 0 1 75.9,72.0 L44.8,72.0 A4.0,4.0 0 0 1 41.3,66.0 L56.9,39.0 A4.0,4.0 0 0 1 63.8,39.0 Z" stroke="#000" stroke-width="9.6"/><polygon points="50,38.5 64.3,63.2 35.7,63.2" fill="#000" stroke="#000" stroke-width="3" stroke-linejoin="round"/></mask><mask id="bsel" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100"><rect width="100" height="100" fill="#fff"/><g font-family="Arial, Helvetica, sans-serif" font-size="5.5" font-weight="800" text-anchor="middle"><text x="50" y="44.5" dy="0.36em">B</text><text x="59.1" y="60.2" dy="0.36em">E</text><text x="40.9" y="60.2" dy="0.36em">S</text></g></mask></defs><g fill="currentColor"><rect x="10" y="8" width="80" height="74" mask="url(#bse0)"/><rect x="10" y="8" width="80" height="74" mask="url(#bse1)"/><rect x="10" y="8" width="80" height="74" mask="url(#bse2)"/><g mask="url(#bsel)"><polygon points="50,44.5 59.1,60.2 40.9,60.2" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/><circle cx="50" cy="44.5" r="4.5"/><circle cx="59.1" cy="60.2" r="4.5"/><circle cx="40.9" cy="60.2" r="4.5"/></g></g></svg>
+        <span class="wordmark">BSE : Digital Twin</span>
+        <span class="version">beta</span>
+      </a>
+      <span class="side end">
+        <span class="lang-toggle" role="group" data-label-ko="언어" data-label-en="Language" aria-label="언어">
+          <button data-lang="ko">KR</button>
+          <button data-lang="en">EN</button>
+        </span>
+      </span>
+    </header>
+
+    <main class="welcome">
+      <div class="head">
+        <span class="title">BSE : Digital Twin</span>
+        <h1>Build · Simulate · Evolve</h1>
+      </div>
+      <!-- The space the factory drawing is centred on. Mice and fingers open the drawing from its floor grid (bg.js);
+           this button only takes part for keyboards and screen readers. -->
+      <button class="room" type="button" aria-expanded="false" data-label-ko="공장 그림 펼치기 또는 접기" data-label-en="Open or close the factory drawing" aria-label="공장 그림 펼치기 또는 접기"></button>
+      <div class="row-buttons">
+        <button class="button" data-ko="빌드 화면은 준비 중입니다." data-en="The build view is coming soon.">Build</button>
+        <button class="button" data-ko="모니터링 화면은 준비 중입니다." data-en="The monitoring view is coming soon.">Monitor</button>
+      </div>
+      <p class="hint" id="hint" hidden></p>
+    </main>
+
+    <script src="script.js"></script>
+    <script type="importmap">
+      { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }
+    </script>
+    <script type="module" src="bg.js"></script>
+  </body>
+</html>
