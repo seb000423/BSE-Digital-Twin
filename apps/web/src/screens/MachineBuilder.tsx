@@ -4,6 +4,8 @@ import { Viewport } from '../three/Viewport.js';
 import { Palette } from '../panels/Palette.js';
 import { Properties } from '../panels/Properties.js';
 import { BottomPanel } from '../panels/BottomPanel.js';
+import { Dock } from '../panels/Dock.js';
+import { Transport } from '../panels/Transport.js';
 import { useEditor } from '../store.js';
 
 /** 실행 중에는 0.1 초마다 다시 그려 신호 값을 보여 준다 */
@@ -116,20 +118,7 @@ export function MachineBuilder() {
           mm
         </label>
         <span className="w-px h-5 bg-border mx-1.5" />
-        {running && (
-          <span className="seg" role="group" aria-label="배속">
-            {[1, 4, 10].map((v) => (
-              <button
-                key={v}
-                type="button"
-                aria-pressed={speed === v}
-                onClick={() => dispatch({ cmd: 'run_demo', speed: v, seed: 1 })}
-              >
-                ×{v}
-              </button>
-            ))}
-          </span>
-        )}
+        {running && <Transport bar />}
         {!running && (
           <span className="text-dim">블록을 누른 채 끌면 옮겨집니다 · 빈 곳을 끌면 화면 회전</span>
         )}
@@ -154,9 +143,9 @@ export function MachineBuilder() {
         </aside>
       </div>
 
-      <div className="h-[200px] shrink-0 border-t border-border overflow-hidden">
+      <Dock>
         <BottomPanel />
-      </div>
+      </Dock>
     </main>
   );
 }

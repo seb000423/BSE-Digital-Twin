@@ -2,9 +2,11 @@
  * Simulate (13 화면 지도 C 실행 모드의 보기 화면): 지금 연 설비를 은선 선화로 돌려 본다.
  * 들어오면 바로 데모 실행을 켜고 RUN/START 류 태그를 올린다. 아래는 신호 표 · 수동 조작 (Build 와 같은 패널).
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Viewport } from '../three/Viewport.js';
 import { BottomPanel } from '../panels/BottomPanel.js';
+import { Dock } from '../panels/Dock.js';
+import { Transport } from '../panels/Transport.js';
 import { useEditor } from '../store.js';
 import { useLiveTick } from './MachineBuilder.js';
 
@@ -12,8 +14,7 @@ import { useLiveTick } from './MachineBuilder.js';
 const AUTO_ON = /_(RUN|START)$/;
 
 export function Simulate() {
-  const { doc, dispatch, running, speed } = useEditor();
-  const [rotate, setRotate] = useState(true);
+  const { doc, dispatch, speed } = useEditor();
   const tick = useLiveTick();
   const rt = useEditor.getState().runtime();
 
@@ -40,45 +41,17 @@ export function Simulate() {
           <b className="text-fg">{doc.meta.name}</b>
           <span className="mono text-dim">데모 시뮬 · 브라우저 · 10 ms 틱</span>
         </div>
-        <div className="ml-auto flex items-center gap-2">
-          <span className="seg" role="group" aria-label="배속">
-            {[1, 4, 10].map((v) => (
-              <button
-                key={v}
-                type="button"
-                aria-pressed={speed === v}
-                onClick={() => dispatch({ cmd: 'run_demo', speed: v, seed: 1 })}
-              >
-                ×{v}
-              </button>
-            ))}
-          </span>
-          <button
-            type="button"
-            className="btn"
-            aria-pressed={rotate}
-            onClick={() => setRotate((r) => !r)}
-            title="화면을 천천히 돌립니다"
-          >
-            자동 회전
-          </button>
-          {running ? (
-            <button type="button" className="btn" onClick={() => dispatch({ cmd: 'stop' })}>
-              정지
-            </button>
-          ) : (
-            <button type="button" className="btn btn-primary" onClick={start}>
-              데모 실행
-            </button>
-          )}
+        <div className="ml-auto flex items-center gap-3">
+          <Transport onPlay={start} />
+          <span className="w-px h-6 bg-border" />
           <a href="#machine" className="btn no-underline" title="이 설비를 Build 에서 고칩니다">
-            Build 로
+            Build 에서 편집 →
           </a>
         </div>
       </div>
 
       <div className="flex-1 min-h-0 relative" data-tick={tick}>
-        <Viewport look="lines" autoRotate={rotate} />
+        <Viewport look="lines" />
         <div className="absolute left-3 top-2.5 flex flex-col gap-0.5 text-[11px] mono text-muted pointer-events-none">
           <span>
             TIME <b className="text-fg">{rt ? rt.time.toFixed(1) : '0.0'}</b> s · ×{speed}
@@ -104,13 +77,13 @@ export function Simulate() {
           </span>
         </div>
         <div className="absolute right-3 bottom-2.5 text-[11px] text-dim pointer-events-none">
-          면은 숨기고 외곽선만 · 끌면 돌리기 · 휠은 확대
+          면은 숨기고 외곽선만 · 끌면 돌려 보기 · 휠은 확대
         </div>
       </div>
 
-      <div className="h-[200px] shrink-0 border-t border-border overflow-hidden">
+      <Dock>
         <BottomPanel />
-      </div>
+      </Dock>
     </main>
   );
 }

@@ -125,7 +125,7 @@ export function Viewport({
         enableDamping={autoRotate}
         autoRotate={autoRotate}
         autoRotateSpeed={0.6}
-        maxPolarAngle={Math.PI * 0.49}
+        maxPolarAngle={Math.PI * 0.44}
         target={[0, bbox[2] * MM * 0.3, 0]}
       />
       <CameraRig size={size} fit={lines ? 0.7 : 1} />
@@ -136,7 +136,7 @@ export function Viewport({
       {lines ? (
         <FadeGrid size={size} />
       ) : (
-        <gridHelper args={[size * 2, Math.round(size * 2), LINE, LINE]} position={[0, -0.001, 0]}>
+        <gridHelper args={[size * 2, Math.round(size * 2), LINE, LINE]} position={[0, -0.008, 0]}>
           <lineBasicMaterial attach="material" color={LINE} transparent opacity={0.22} />
         </gridHelper>
       )}
@@ -217,7 +217,7 @@ function FadeGrid({ size }: { size: number }) {
     return g;
   }, [size]);
   return (
-    <lineSegments geometry={geo} position={[0, -0.001, 0]}>
+    <lineSegments geometry={geo} position={[0, -0.008, 0]}>
       <lineBasicMaterial
         vertexColors
         transparent
@@ -409,21 +409,20 @@ function Prim({ p, selected, h }: { p: Primitive; selected: boolean; h: PrimHand
         <cylinderGeometry args={[p.size[0], p.size[1], p.size[2], 20]} />
       )}
       {lines ? (
-        // 깊이만 기록하는 가림막: 뒤쪽 선을 숨긴다 (은선 제거)
-        <meshBasicMaterial
-          colorWrite={false}
-          polygonOffset
-          polygonOffsetFactor={1}
-          polygonOffsetUnits={1}
-        />
+        // 깊이만 기록하는 가림막: 뒤쪽 선을 숨긴다 (은선 제거). 면 자체는 밀지 않는다(바닥 격자와 깊이가 겹쳐 깜빡이므로)
+        <meshBasicMaterial colorWrite={false} />
       ) : (
         <meshLambertMaterial color={TONES[p.tone]} transparent opacity={0.92} />
       )}
+      {/* 외곽선은 면보다 살짝 앞으로 당겨 그린다(면과 깊이 싸움 방지). 선은 삼각형 띠(Line2)라 polygonOffset 이 먹는다 */}
       <Edges
         color={selected ? SEL : LINE}
         threshold={p.kind === 'cylinder' ? 30 : 15}
         transparent
         opacity={lines ? ([0.45, 0.7, 1][p.tone] ?? 1) : 1}
+        polygonOffset
+        polygonOffsetFactor={-1}
+        polygonOffsetUnits={-2}
       />
     </mesh>
   );

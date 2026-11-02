@@ -48,6 +48,8 @@ export interface EditorState {
   /** 명령 하나 실행. UI 의 유일한 쓰기 경로 */
   dispatch: (cmd: unknown) => CommandResult;
   runtime: () => MachineRuntime | null;
+  /** 배속 (화면 값, 문서 아님). 실행 중이면 런타임에도 바로 적용 */
+  setSpeed: (v: number) => void;
   /** 새 문서로 바꾼다 (빈 설비 · 템플릿 · 파일) */
   open: (src: OpenSource) => void;
   /** machine.json 글자를 검사해서 연다. 실패하면 오류 글자 */
@@ -75,6 +77,11 @@ export const useEditor = create<EditorState>((set, get) => {
       return r;
     },
     runtime: () => get().editor.run,
+    setSpeed: (v) => {
+      const rt = get().editor.run;
+      if (rt) rt.speed = v;
+      set({ speed: v });
+    },
     open: (src) => {
       get().editor.dispatch({ cmd: 'stop' });
       set({ editor: makeEditor(src) });

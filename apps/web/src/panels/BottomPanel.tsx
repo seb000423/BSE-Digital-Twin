@@ -1,4 +1,5 @@
 /** 아래: 신호 표(실행 중 실시간 값) · 수동 조작 패널(force_tag) · 명령 기록 */
+import { useRef, useState } from 'react';
 import { useLiveTick } from '../screens/MachineBuilder.js';
 import { prefixOf, useEditor } from '../store.js';
 
@@ -24,9 +25,23 @@ export function BottomPanel() {
     }
   };
 
+  // 두 칸 사이 세로 손잡이: 왼쪽(신호 표) 비율 35~80%
+  const [left, setLeft] = useState(0.66);
+  const box = useRef<HTMLDivElement>(null);
+  const onSplit = (e: React.PointerEvent<HTMLDivElement>) => {
+    const el = box.current;
+    if (!el || e.buttons !== 1) return;
+    const r = el.getBoundingClientRect();
+    setLeft(Math.min(0.8, Math.max(0.35, (e.clientX - r.left) / r.width)));
+  };
+
   return (
-    <div className="h-full grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)] text-xs">
-      <div className="min-w-0 flex flex-col overflow-hidden border-r border-border">
+    <div
+      ref={box}
+      className="h-full grid text-xs"
+      style={{ gridTemplateColumns: `minmax(0,${left}fr) 6px minmax(0,${1 - left}fr)` }}
+    >
+      <div className="min-w-0 flex flex-col overflow-hidden">
         <h3 className="panel-h m-0">
           신호 표{' '}
           <span className="font-normal">
@@ -89,6 +104,15 @@ export function BottomPanel() {
           </table>
         </div>
       </div>
+      <div
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="신호 표 너비"
+        title="끌어서 너비 조절"
+        className="cursor-col-resize bg-[rgb(200_225_245/10%)] hover:bg-[rgb(200_225_245/35%)]"
+        onPointerDown={(e) => (e.target as Element).setPointerCapture(e.pointerId)}
+        onPointerMove={onSplit}
+      />
       <div className="min-w-0 flex flex-col overflow-hidden">
         <h3 className="panel-h m-0">수동 조작 · 명령 기록</h3>
         <div className="px-3 py-2 flex flex-wrap gap-1.5 border-b border-border">
