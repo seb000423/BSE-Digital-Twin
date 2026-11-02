@@ -8,57 +8,34 @@ import { createLibrary } from '@bse/blocks';
 import {
   MachineEditor,
   createIdFactory,
+  getTemplate,
   newMachine,
   type LogEntry,
   type MachineRuntime,
+  type TemplateId,
 } from '@bse/engine';
-import type { CommandResult, Machine } from '@bse/schema';
+import { Machine, type CommandResult } from '@bse/schema';
 
 export const lib = createLibrary();
 const newId = createIdFactory();
 
-function makeEditor(): MachineEditor {
-  const ed = new MachineEditor(newMachine(newId(), '컨베이어 스테이션', [9000, 4000, 2400]), {
-    lib,
-    newId,
-  });
-  // 시작 장면: 기준 설비 1 (컨베이어 스테이션) 의 뼈대. 치수는 예시값
-  const r = ed.dispatch({
-    cmd: 'add_block',
-    blockType: 'roller-conveyor',
-    params: { length: 3000, width: 600, speed: 300 },
-  });
-  if (r.ok) {
-    const cv = r.created[0]!;
-    ed.dispatch({
-      cmd: 'add_block',
-      blockType: 'source',
-      parent: cv,
-      params: { interval: 4 },
-      transform: { position: [-1300, 0, 750] },
-    });
-    ed.dispatch({
-      cmd: 'add_block',
-      blockType: 'photo-sensor',
-      parent: cv,
-      transform: { position: [600, 0, 750] },
-    });
-    ed.dispatch({
-      cmd: 'add_block',
-      blockType: 'stopper',
-      parent: cv,
-      transform: { position: [1000, 0, 700] },
-    });
-    ed.dispatch({
-      cmd: 'add_block',
-      blockType: 'sink',
-      parent: cv,
-      transform: { position: [1400, 0, 750] },
-    });
-    ed.dispatch({ cmd: 'select', ids: [cv] });
-  }
+/** 무엇을 열지: 빈 설비 · 템플릿 3종 · 저장해 둔 machine.json */
+export type OpenSource = 'blank' | TemplateId | Machine;
+
+function makeEditor(src: OpenSource = 'conveyor-station'): MachineEditor {
+  if (typeof src === 'object') return new MachineEditor(src, { lib, newId });
+  if (src === 'blank')
+    return new MachineEditor(newMachine(newId(), '새 설비', [3000, 2000, 2000]), { lib, newId });
+  const t = getTemplate(src);
+  const ed = new MachineEditor(newMachine(newId(), t.name, t.bbox), { lib, newId });
+  t.build(ed);
   ed.log.length = 0;
   return ed;
+}
+
+/** 템플릿을 조립만 해서 문서를 돌려준다 (홈 카드 미리보기용, 편집기 상태와 무관) */
+export function templateDoc(id: TemplateId): Machine {
+  return makeEditor(id).doc;
 }
 
 export interface EditorState {
@@ -71,7 +48,10 @@ export interface EditorState {
   /** 명령 하나 실행. UI 의 유일한 쓰기 경로 */
   dispatch: (cmd: unknown) => CommandResult;
   runtime: () => MachineRuntime | null;
-  reset: () => void;
+  /** 새 문서로 바꾼다 (빈 설비 · 템플릿 · 파일) */
+  open: (src: OpenSource) => void;
+  /** machine.json 글자를 검사해서 연다. 실패하면 오류 글자 */
+  openJson: (text: string) => string | null;
 }
 
 export const useEditor = create<EditorState>((set, get) => {
@@ -95,9 +75,20 @@ export const useEditor = create<EditorState>((set, get) => {
       return r;
     },
     runtime: () => get().editor.run,
-    reset: () => {
-      set({ editor: makeEditor() });
+    open: (src) => {
+      get().editor.dispatch({ cmd: 'stop' });
+      set({ editor: makeEditor(src) });
       sync();
+    },
+    openJson: (text) => {
+      try {
+        const r = Machine.safeParse(JSON.parse(text));
+        if (!r.success) return `machine.json 형식이 아닙니다: ${r.error.issues[0]?.message ?? ''}`;
+        get().open(r.data);
+        return null;
+      } catch {
+        return 'JSON 을 읽을 수 없습니다';
+      }
     },
   };
 });

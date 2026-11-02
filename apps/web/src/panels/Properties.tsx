@@ -9,7 +9,28 @@ export function Properties() {
     return (
       <div className="text-xs">
         <h3 className="panel-h m-0">속성</h3>
-        <p className="px-3 py-3 text-muted">3D 에서 설비를 클릭하거나 노드 트리에서 고르세요.</p>
+        <p className="px-3 py-3 text-muted">
+          3D 에서 블록을 클릭하거나 왼쪽 노드 트리에서 고르세요.
+        </p>
+        <h3 className="panel-h m-0">이 화면 쓰는 법</h3>
+        <ol className="m-0 px-3 py-3 pl-7 flex flex-col gap-1.5 text-muted">
+          <li>
+            <b className="text-fg">왼쪽 팔레트</b>에서 블록을 누르면 바닥에 놓입니다. 컨베이어를
+            고른 상태면 센서·스토퍼는 그 위에 놓입니다.
+          </li>
+          <li>
+            <b className="text-fg">3D</b>에서 블록을 누른 채 끌면 옮겨집니다 (50 mm 단위). 빈 곳을
+            끌면 화면이 돌고, 휠은 확대입니다.
+          </li>
+          <li>
+            블록을 고르면 <b className="text-fg">여기</b>에 길이·속도 같은 숫자가 나옵니다. 고치면
+            3D 가 바로 바뀝니다.
+          </li>
+          <li>
+            위의 <b className="text-fg">실행</b>을 누르면 설비가 움직이고, 아래 신호 표에서 태그를
+            켜고 끌 수 있습니다.
+          </li>
+        </ol>
         <h3 className="panel-h m-0">설비</h3>
         <div className="kv p-3">
           <span>이름</span>
@@ -56,6 +77,54 @@ export function Properties() {
               onChange={(v) => set(p.key, v)}
             />
           ))}
+        </div>
+        <div className="kv pt-1">
+          <span>위치 mm</span>
+          <span className="flex gap-1">
+            {([0, 1, 2] as const).map((i) => (
+              <input
+                key={`${i}:${node.transform.position[i]}`}
+                className="field mono px-1"
+                type="number"
+                step={50}
+                aria-label={`위치 ${'XYZ'[i]}`}
+                title={['X 투입→배출', 'Y 좌측', 'Z 높이'][i]}
+                defaultValue={node.transform.position[i]}
+                onBlur={(e) => {
+                  const v = Number(e.target.value);
+                  if (!Number.isFinite(v) || v === node.transform.position[i]) return;
+                  const position = [...node.transform.position] as [number, number, number];
+                  position[i] = v;
+                  dispatch({ cmd: 'move', id: node.id, transform: { position } });
+                }}
+                onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+              />
+            ))}
+          </span>
+          <span>회전</span>
+          <span className="flex gap-1 items-center">
+            <span className="mono">{node.transform.rotation[2]}°</span>
+            <button
+              type="button"
+              className="btn min-h-6 px-2"
+              title="위에서 봤을 때 반시계로 90° 돌리기"
+              onClick={() =>
+                dispatch({
+                  cmd: 'move',
+                  id: node.id,
+                  transform: {
+                    rotation: [
+                      node.transform.rotation[0],
+                      node.transform.rotation[1],
+                      (node.transform.rotation[2] + 90) % 360,
+                    ],
+                  },
+                })
+              }
+            >
+              ↻ 90°
+            </button>
+          </span>
         </div>
         <div className="flex gap-1.5 pt-1">
           <button

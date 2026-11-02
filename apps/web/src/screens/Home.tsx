@@ -1,34 +1,35 @@
-/** 홈 (13 화면 지도 B, 04 §9.3): 제목 줄 + 설비 라이브러리 패널 + 공장 표 · 최근 실행 결과 표. 값은 시연용 */
-import { lib } from '../store.js';
+/**
+ * 홈 (13 화면 지도 B, 04 §9.3): 한 페이지에 설비 · 공장 · 최근 실행을 같은 패널로 쌓는다.
+ * 패널 머리글 오른쪽에 그 패널의 "새로 만들기" 하나씩. 카드·행을 누르면 그 화면으로 이어진다.
+ */
+import { useMemo, useRef } from 'react';
+import { MACHINE_TEMPLATES } from '@bse/engine';
+import { Thumb } from '../panels/Thumb.js';
+import { lib, templateDoc, useEditor, type OpenSource } from '../store.js';
 
-const CARDS = [
-  {
-    name: '컨베이어 스테이션',
-    grade: 'L2',
-    meta: '사이클 12.0 s · 양품률 99.2%',
-    size: '3000 × 800 mm',
-    dot: 'bg-ok',
-    stat: '치수 확인됨 · 태그 14개',
-  },
-  {
-    name: '픽앤플레이스 셀',
-    grade: 'L2',
-    meta: '사이클 4.5 s · 양품률 99.8%',
-    size: '1800 × 1800 mm',
-    dot: 'bg-warn',
-    stat: '관절 속도 미확인 2건',
-  },
-  {
-    name: '프레스 스테이션',
-    grade: 'L1',
-    meta: '사이클 8.0 s · 양품률 98.5%',
-    size: '2400 × 2000 mm',
-    dot: 'bg-muted',
-    stat: '카드만 있음 (상자 + 수치)',
-  },
-];
+const GRADE: Record<string, string> = {
+  'conveyor-station': 'L2',
+  'pick-place-cell': 'L2',
+  'press-station': 'L1',
+};
 
 export function Home() {
+  const open = useEditor((s) => s.open);
+  const openJson = useEditor((s) => s.openJson);
+  const file = useRef<HTMLInputElement>(null);
+  const docs = useMemo(() => MACHINE_TEMPLATES.map((t) => ({ t, doc: templateDoc(t.id) })), []);
+
+  const go = (src: OpenSource) => {
+    open(src);
+    location.hash = '#machine';
+  };
+  const onFile = async (f: File | undefined) => {
+    if (!f) return;
+    const err = openJson(await f.text());
+    if (err) alert(err);
+    else location.hash = '#machine';
+  };
+
   return (
     <main
       className="flex-1 overflow-auto px-4 py-6 max-w-[1360px] w-full mx-auto flex flex-col gap-5"
@@ -37,62 +38,76 @@ export function Home() {
       }}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="m-0 text-2xl font-bold leading-10">BSE Studio</h1>
+        <div>
+          <h1 className="m-0 text-2xl font-bold leading-10">BSE Studio</h1>
+          <p className="m-0 text-xs text-muted">
+            설비를 만들고(Build) → 돌려 보고(Simulate) → 현장과 맞춘다(Evolve)
+          </p>
+        </div>
         <div className="flex gap-2">
-          <a href="#machine" className="btn btn-primary min-w-30 h-10 text-sm">
-            새 설비
-          </a>
-          <a
-            href="#factory"
-            className="btn min-w-30 h-10 text-sm border-line"
-            aria-disabled="true"
-            onClick={(e) => e.preventDefault()}
-          >
-            새 공장
-          </a>
+          <input
+            ref={file}
+            type="file"
+            accept=".json,application/json"
+            hidden
+            onChange={(e) => void onFile(e.target.files?.[0])}
+          />
+          <button type="button" className="btn h-10 px-4" onClick={() => file.current?.click()}>
+            저장한 설비 열기 (machine.json)
+          </button>
         </div>
       </div>
 
       <section className="panel border border-border rounded-sm bg-[rgb(22_57_92/45%)]">
         <h2 className="panel-h m-0 min-h-11 text-sm text-fg">
-          설비 라이브러리 <span className="font-normal text-muted">{CARDS.length}</span>
-          <span className="ml-auto text-muted font-normal">블록 {lib.size}종 준비됨</span>
-        </h2>
-        <div className="grid gap-4 p-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-          {CARDS.map((c) => (
-            <a
-              key={c.name}
-              href="#machine"
-              className="grid gap-2 p-3 border border-border rounded-sm bg-[rgb(15_42_69/55%)] text-fg no-underline hover:border-line"
-            >
-              <div className="h-[110px] border border-[rgb(207_228_245/25%)] rounded-sm bg-bg bg-[linear-gradient(rgb(207_228_245/12%)_1px,transparent_1px),linear-gradient(90deg,rgb(207_228_245/12%)_1px,transparent_1px)] bg-[size:18px_18px] flex items-center justify-center text-muted text-xs">
-                3D 미리보기
-              </div>
-              <div className="flex items-center justify-between font-bold text-sm">
-                <span>{c.name}</span>
-                <span className="text-[11px] font-bold px-1.5 border border-line rounded-sm text-line">
-                  {c.grade}
-                </span>
-              </div>
-              <div className="text-xs text-muted leading-[18px] h-9">
-                {c.meta}
-                <br />
-                {c.size}
-              </div>
-              <div className="text-xs text-muted">
-                <i className={`dot ${c.dot}`} />
-                {c.stat}
-              </div>
-            </a>
-          ))}
-          <a
-            href="#machine"
-            className="flex flex-col items-center justify-center gap-2 p-3 border border-dashed border-border rounded-sm text-muted no-underline hover:border-line min-h-[220px]"
+          설비 <span className="font-normal text-muted">{docs.length}</span>
+          <span className="text-muted font-normal">
+            · 블록 {lib.size}종으로 조립 · Build 에서 편집
+          </span>
+          <button
+            type="button"
+            className="btn btn-primary ml-auto min-h-8"
+            onClick={() => go('blank')}
           >
-            <span className="text-2xl">+</span>
-            <span className="font-bold text-fg">새 설비 만들기</span>
-            <span className="text-xs text-dim">빈 설비 · 템플릿 3종</span>
-          </a>
+            + 새 설비
+          </button>
+        </h2>
+        <div className="grid gap-4 p-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {docs.map(({ t, doc }) => {
+            const unverified = doc.joints.filter(
+              (j) => !j.verified.vmax || !j.verified.amax,
+            ).length;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => go(t.id)}
+                className="grid gap-2 p-3 border border-border rounded-sm bg-[rgb(15_42_69/55%)] text-fg text-left cursor-pointer hover:border-line"
+                title="Build 에서 연다"
+              >
+                <div className="h-[130px] border border-[rgb(207_228_245/25%)] rounded-sm bg-bg bg-[linear-gradient(rgb(207_228_245/12%)_1px,transparent_1px),linear-gradient(90deg,rgb(207_228_245/12%)_1px,transparent_1px)] bg-[size:18px_18px] text-line p-2">
+                  <Thumb doc={doc} className="w-full h-full" />
+                </div>
+                <div className="flex items-center justify-between font-bold text-sm">
+                  <span>{t.name}</span>
+                  <span className="text-[11px] font-bold px-1.5 border border-line rounded-sm text-line">
+                    {GRADE[t.id]}
+                  </span>
+                </div>
+                <div className="text-xs text-muted leading-[18px]">
+                  {t.summary}
+                  <br />
+                  <span className="mono">
+                    {t.bbox[0]} × {t.bbox[1]} mm · 블록 {doc.nodes.length} · 태그 {doc.io.length}
+                  </span>
+                </div>
+                <div className="text-xs text-muted">
+                  <i className={`dot ${unverified ? 'bg-warn' : 'bg-ok'}`} />
+                  {unverified ? `관절 속도 미확인 ${unverified}건 · 치수 예시값` : '치수 확인됨'}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </section>
 
@@ -100,7 +115,10 @@ export function Home() {
         <div className="panel border border-border rounded-sm bg-[rgb(22_57_92/45%)]">
           <h2 className="panel-h m-0 min-h-11 text-sm text-fg">
             공장 <span className="font-normal text-muted">2</span>
-            <span className="ml-auto mono text-dim font-normal">최근 수정순</span>
+            <span className="text-muted font-normal">· 예시 · 3단계에서 만듭니다</span>
+            <a href="#factory" className="btn ml-auto min-h-8 no-underline">
+              + 새 공장
+            </a>
           </h2>
           <table className="tbl">
             <thead>
@@ -112,25 +130,31 @@ export function Home() {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className="font-semibold">2공장 A라인</td>
-                <td className="text-right">12대</td>
-                <td className="text-right mono">48 × 30 m</td>
-                <td className="text-right text-muted">오늘 14:02</td>
-              </tr>
-              <tr>
-                <td className="font-semibold">신규 라인 검토안</td>
-                <td className="text-right">7대</td>
-                <td className="text-right mono">30 × 24 m</td>
-                <td className="text-right text-muted">어제</td>
-              </tr>
+              {[
+                ['2공장 A라인', '12대', '48 × 30 m', '오늘 14:02'],
+                ['신규 라인 검토안', '7대', '30 × 24 m', '어제'],
+              ].map((r) => (
+                <tr
+                  key={r[0]}
+                  className="cursor-pointer hover:bg-[rgb(220_235_247/6%)]"
+                  onClick={() => (location.hash = '#factory')}
+                >
+                  <td className="font-semibold">{r[0]}</td>
+                  <td className="text-right">{r[1]}</td>
+                  <td className="text-right mono">{r[2]}</td>
+                  <td className="text-right text-muted">{r[3]}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
         <div className="panel border border-border rounded-sm bg-[rgb(22_57_92/45%)]">
           <h2 className="panel-h m-0 min-h-11 text-sm text-fg">
-            최근 실행 결과 <span className="font-normal text-muted">2</span>
-            <span className="ml-auto mono text-dim font-normal">서버 실행</span>
+            최근 실행 <span className="font-normal text-muted">2</span>
+            <span className="text-muted font-normal">· 예시 · 정식 실행은 4단계</span>
+            <a href="#simulate" className="btn ml-auto min-h-8 no-underline">
+              Simulate 열기
+            </a>
           </h2>
           <table className="tbl">
             <thead>
@@ -141,7 +165,10 @@ export function Home() {
               </tr>
             </thead>
             <tbody>
-              <tr>
+              <tr
+                className="cursor-pointer hover:bg-[rgb(220_235_247/6%)]"
+                onClick={() => (location.hash = '#simulate')}
+              >
                 <td>
                   <b>A라인 — 버퍼 3 vs 5</b> <span className="text-muted">· 8 h × 10회</span>
                 </td>
@@ -151,7 +178,10 @@ export function Home() {
                   완료
                 </td>
               </tr>
-              <tr>
+              <tr
+                className="cursor-pointer hover:bg-[rgb(220_235_247/6%)]"
+                onClick={() => (location.hash = '#simulate')}
+              >
                 <td>
                   <b>신규 라인 — 로봇 1대 vs 2대</b>{' '}
                   <span className="text-muted">· 8 h × 10회</span>

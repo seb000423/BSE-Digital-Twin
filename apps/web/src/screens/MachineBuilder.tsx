@@ -100,8 +100,11 @@ export function MachineBuilder() {
           ↷ 다시 실행
         </button>
         <span className="w-px h-5 bg-border mx-1.5" />
-        <label className="flex items-center gap-2 whitespace-nowrap">
-          외곽 가이드
+        <label
+          className="flex items-center gap-2 whitespace-nowrap"
+          title="설비가 차지할 바닥 크기(가로 × 세로 × 높이). 3D 의 점선 상자"
+        >
+          설비 크기
           <input
             className="field w-44 mono"
             value={bbox}
@@ -127,7 +130,15 @@ export function MachineBuilder() {
             ))}
           </span>
         )}
-        <span className="ml-auto mono">mm · deg · Z-up · 격자 1000 mm</span>
+        {!running && (
+          <span className="text-dim">블록을 누른 채 끌면 옮겨집니다 · 빈 곳을 끌면 화면 회전</span>
+        )}
+        <span
+          className="ml-auto mono"
+          title="단위는 mm 와 도(deg), 높이 방향은 Z, 바닥 격자 한 칸 1000 mm"
+        >
+          mm · deg · Z-up · 격자 1000 mm
+        </span>
       </div>
 
       <div className="flex-1 min-h-0 flex overflow-hidden">
@@ -160,10 +171,16 @@ function Hud() {
       className="absolute right-3 top-2.5 flex flex-col items-end gap-1.5 text-[11px] text-muted pointer-events-none"
       data-tick={tick}
     >
-      <span className="px-2 py-0.5 border border-border rounded-sm bg-[rgb(15_42_69/80%)]">
+      <span
+        className="px-2 py-0.5 border border-border rounded-sm bg-[rgb(15_42_69/80%)] pointer-events-auto"
+        title="블록 = 놓은 부품 수 · 관절 = 움직이는 축 수 · 태그 = PLC 신호 수"
+      >
         블록 {doc.nodes.length} · 관절 {doc.joints.length} · 태그 {doc.io.length}
       </span>
-      <span className="px-2 py-0.5 border border-border rounded-sm bg-[rgb(15_42_69/80%)]">
+      <span
+        className="px-2 py-0.5 border border-border rounded-sm bg-[rgb(15_42_69/80%)] pointer-events-auto"
+        title="좌표 0,0,0 은 설비 바닥면의 가운데. X 가 물건이 흘러가는 방향"
+      >
         원점 = 바닥면 중심 · X 투입→배출
       </span>
       {running && rt && (

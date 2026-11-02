@@ -4,13 +4,26 @@
  */
 import { describe, expect, it } from 'vitest';
 import { createLibrary } from '@bse/blocks';
-import { MachineEditor, createRng, createSeededIdFactory, newMachine } from '../src/index.js';
+import {
+  MachineEditor,
+  createRng,
+  createSeededIdFactory,
+  getTemplate,
+  newMachine,
+  type TemplateId,
+} from '../src/index.js';
 
 const lib = createLibrary();
-const editor = (name: string, bbox: [number, number, number]) => {
+/** 템플릿(홈 화면 카드와 같은 함수)으로 조립한 편집기 */
+const fromTemplate = (id: TemplateId) => {
+  const t = getTemplate(id);
   const newId = createSeededIdFactory(createRng(42));
-  return new MachineEditor(newMachine(newId(), name, bbox), { lib, newId });
+  const ed = new MachineEditor(newMachine(newId(), t.name, t.bbox), { lib, newId });
+  t.build(ed);
+  return ed;
 };
+const byType = (ed: MachineEditor, blockType: string) =>
+  ed.doc.nodes.find((n) => n.blockType === blockType)!.id;
 const must = (ed: MachineEditor, cmd: unknown): string[] => {
   const r = ed.dispatch(cmd);
   if (!r.ok) throw new Error(`${JSON.stringify(cmd)} → ${r.error}`);
@@ -18,44 +31,8 @@ const must = (ed: MachineEditor, cmd: unknown): string[] => {
 };
 
 describe('기준 설비 1: 컨베이어 스테이션', () => {
-  const ed = editor('컨베이어 스테이션', [4000, 1200, 1800]);
-  const [cv] = must(ed, {
-    cmd: 'add_block',
-    blockType: 'roller-conveyor',
-    params: { length: 3000, width: 600, speed: 300 },
-  });
-  must(ed, {
-    cmd: 'add_block',
-    blockType: 'source',
-    parent: cv,
-    params: { interval: 5 },
-    transform: { position: [-1300, 0, 750] },
-  });
-  must(ed, {
-    cmd: 'add_block',
-    blockType: 'photo-sensor',
-    parent: cv,
-    transform: { position: [600, 0, 750] },
-  });
-  must(ed, {
-    cmd: 'add_block',
-    blockType: 'stopper',
-    parent: cv,
-    transform: { position: [1000, 0, 700] },
-  });
-  must(ed, {
-    cmd: 'add_block',
-    blockType: 'sink',
-    parent: cv,
-    transform: { position: [1400, 0, 750] },
-  });
-  must(ed, {
-    cmd: 'add_block',
-    blockType: 'control-cabinet',
-    transform: { position: [0, 1000, 0] },
-  });
-  must(ed, { cmd: 'add_block', blockType: 'tower-lamp', transform: { position: [0, 1000, 1800] } });
-  must(ed, { cmd: 'make_card' });
+  const ed = fromTemplate('conveyor-station');
+  const cv = byType(ed, 'roller-conveyor');
 
   it('태그 표가 만들어진다 (컨베이어 RUN/DIR/SPEED, 스토퍼 UP/DOWN/LS, 센서 ON, 설비 공통)', () => {
     const tags = ed.doc.io.map((e) => e.tag);
@@ -120,47 +97,9 @@ describe('기준 설비 1: 컨베이어 스테이션', () => {
 });
 
 describe('기준 설비 2: 픽앤플레이스 셀', () => {
-  const ed = editor('픽앤플레이스 셀', [2500, 2500, 2200]);
-  const [frame] = must(ed, {
-    cmd: 'add_block',
-    blockType: 'frame-table',
-    params: { w: 1200, d: 800, h: 750 },
-  });
-  const [robot] = must(ed, {
-    cmd: 'add_block',
-    blockType: 'robot-6axis',
-    params: { reach: 900, payload: 7, cycle: 4 },
-    transform: { position: [0, -900, 0] },
-  });
-  const [grip] = must(ed, {
-    cmd: 'add_block',
-    blockType: 'gripper-parallel',
-    params: { stroke: 15 },
-  });
-  must(ed, { cmd: 'snap', id: grip, socket: 'base', targetId: robot, targetSocket: 'flange' });
-  must(ed, {
-    cmd: 'add_block',
-    blockType: 'pallet-tray',
-    parent: frame,
-    transform: { position: [-300, 0, 750] },
-  });
-  must(ed, {
-    cmd: 'add_block',
-    blockType: 'belt-conveyor',
-    params: { length: 1500, width: 300 },
-    transform: { position: [1200, 0, 0] },
-  });
-  must(ed, {
-    cmd: 'add_block',
-    blockType: 'light-curtain',
-    params: { width: 2400 },
-    transform: { position: [0, 1200, 0] },
-  });
-  must(ed, {
-    cmd: 'add_block',
-    blockType: 'fence-panel',
-    transform: { position: [-1200, 0, 0], rotation: [0, 0, 90] },
-  });
+  const ed = fromTemplate('pick-place-cell');
+  const robot = byType(ed, 'robot-6axis');
+  const grip = byType(ed, 'gripper-parallel');
 
   it('로봇 관절 6 + 그리퍼 관절 1, 태그에 PGM_NO·START·INPOS 와 OPEN/CLOSE 가 있다', () => {
     expect(ed.doc.joints.filter((j) => j.node === robot)).toHaveLength(6);
@@ -201,27 +140,8 @@ describe('기준 설비 2: 픽앤플레이스 셀', () => {
 });
 
 describe('기준 설비 3: 프레스 스테이션', () => {
-  const ed = editor('프레스 스테이션', [2400, 2000, 2800]);
-  const [press] = must(ed, {
-    cmd: 'add_block',
-    blockType: 'servo-press',
-    params: { stroke: 200, cycle: 8, ok_rate: 0.5 },
-  });
-  must(ed, {
-    cmd: 'add_block',
-    blockType: 'jig-fixture',
-    parent: press,
-    transform: { position: [0, 0, 840] },
-  });
-  must(ed, { cmd: 'add_block', blockType: 'safety-door', transform: { position: [0, -1000, 0] } });
-  must(ed, {
-    cmd: 'add_block',
-    blockType: 'light-curtain',
-    transform: { position: [-1000, 0, 0] },
-  });
-  must(ed, { cmd: 'add_block', blockType: 'ng-pusher', transform: { position: [900, 0, 840] } });
-  must(ed, { cmd: 'add_block', blockType: 'op-panel', transform: { position: [1100, -900, 0] } });
-  must(ed, { cmd: 'make_card' });
+  const ed = fromTemplate('press-station');
+  const press = byType(ed, 'servo-press');
 
   it('카드(L1)는 공정 시간 8 s 를 그대로 받는다', () => {
     expect(ed.doc.card.cycle_time).toBe(8);

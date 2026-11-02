@@ -11,3 +11,9 @@ export {
 export { MachineEditor, type LogEntry } from './editor/session.js';
 export { uuidV7, createIdFactory, createSeededIdFactory, type IdFactory } from './editor/uuid.js';
 export { MachineRuntime, type WorkState } from './runtime/machine-runtime.js';
+export {
+  MACHINE_TEMPLATES,
+  getTemplate,
+  type MachineTemplate,
+  type TemplateId,
+} from './editor/templates.js';

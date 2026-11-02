@@ -40,7 +40,9 @@ export function Palette() {
 
   return (
     <div className="flex flex-col text-xs">
-      <h3 className="panel-h m-0">블록 팔레트</h3>
+      <h3 className="panel-h m-0" title="부품 목록. 누르면 3D 에 놓입니다">
+        블록 팔레트 <span className="ml-auto font-normal text-dim">누르면 놓임</span>
+      </h3>
       {CATEGORIES.map((c) => {
         const items = lib.list(c.id);
         const isOpen = open === c.id;
@@ -75,8 +77,8 @@ export function Palette() {
           </div>
         );
       })}
-      <h3 className="panel-h m-0 mt-1">
-        노드 트리 <span className="ml-auto font-normal">{doc.nodes.length}</span>
+      <h3 className="panel-h m-0 mt-1" title="놓인 블록 목록. 누르면 선택됩니다">
+        놓인 블록 <span className="ml-auto font-normal">{doc.nodes.length}</span>
       </h3>
       <div className="py-1">
         <div className="px-3 py-1 mono text-muted">{doc.meta.name}</div>
