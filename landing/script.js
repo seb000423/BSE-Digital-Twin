@@ -46,8 +46,8 @@ document.querySelectorAll('.lang-toggle button').forEach((button) => {
   });
 });
 
-// Neither screen is online yet — say so in place
-document.querySelectorAll('.row-buttons .button').forEach((button) => {
+// Build opens BSE Studio (/studio/). Monitor is not online yet — say so in place
+document.querySelectorAll('.row-buttons button.button').forEach((button) => {
   button.addEventListener('click', () => {
     shown = button;
     hint.textContent = button.dataset[lang];

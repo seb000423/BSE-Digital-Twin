@@ -65,7 +65,7 @@
 | 태그 이름 | 대문자·숫자·밑줄, `{스테이션}.{설비}.{태그}` (예: `ST01.M1.CYL1_FWD`), 32자 이내 |
 
 ## 6. 배포
-- 랜딩 페이지: `BSE-Digital-Twin` 저장소 main의 `landing/`을 Vercel이 자동 배포 (Vercel 프로젝트 루트 폴더 = `landing`)
+- 사이트 하나: `BSE-Digital-Twin` main 을 Vercel 프로젝트 `bse-digital-twin` 이 자동 배포. 루트 `vercel.json` 이 `apps/web` 을 빌드한 뒤 `landing/` 과 합쳐 `site/` 로 내보낸다 → `/` = 랜딩, `/studio/` = BSE Studio (D-36). Vercel 프로젝트의 루트 폴더 설정은 저장소 루트(비움)
 - BSE Studio: Docker Compose(개발·단일 서버) + GitHub Actions (기준서). 공개 주소가 생기면 Build 버튼 연결
 
 ## 7. 기술 선택 이유
