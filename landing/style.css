@@ -17,6 +17,8 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
 body { font-family: var(--font-sans); font-size: 14px; line-height: 1.6; color: var(--foreground); -webkit-font-smoothing: antialiased; }
+/* Nothing on this page takes typed text, so never show a text cursor (a browser's caret browsing mode, F7, would otherwise draw one) */
+html { caret-color: transparent; }
 /* A soft glow behind the drawing; the only grid is the one on the factory floor */
 body {
   background: radial-gradient(ellipse 70% 65% at 50% 58%, var(--glow), transparent) var(--background) fixed;
