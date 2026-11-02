@@ -351,18 +351,18 @@ L1 카드: 상태 태그만, 사이클타임 기반 DES · L2 기구·신호: �
 
 ### 10.2 1단계에서 정할 것
 - [ ] 2장 설계 원칙 8개 승인
-- [ ] 4장 machine.json / factory.json / 블록 정의 / 태그 규칙 / spec 스키마 / ext 확정 (zod → JSON Schema)
+- [x] 4장 machine.json / factory.json / 블록 정의 / 태그 규칙 / spec 스키마 / ext — zod 초안 `packages/schema` (JSON Schema 생성 포함). 오너 승인 대기
 - [ ] 5장 좌표계·단위 규약 확정 (USD·URDF export 검증 포함)
-- [ ] 편집 API 명령 목록 초안 (add_block, set_param, snap, add_joint, bind_tag, draw_wall, place_machine, connect_flow, run_scenario, export …)
+- [x] 편집 API 명령 목록 초안 54개 ([14](14_EDIT_COMMANDS.md), `packages/schema/src/commands.ts`)
 - [ ] 기준 설비 3종·기준 공장 1개의 치수·I/O 리스트·레퍼런스 확보 (오너)
 - [x] 저장소: `seb000423/BSE-Digital-Twin` (D-32)
-- [ ] 모노레포 패키지 경계(schema·engine·blocks)와 ESLint boundaries 규칙
+- [x] 모노레포 패키지 경계(schema·engine·blocks) ESLint 로 강제, CI(GitHub Actions: lint·format·typecheck·test)
 
 ### 10.3 작업 규칙
 - 블록 라이브러리는 기준 설비를 재현하면서 채운다. 목록을 먼저 채우지 않는다
 - 게이트 통과 기준은 "데모가 돌아간다"가 아니라 "완성 기준의 해당 항목이 회귀 테스트로 통과한다"
 - 새 기능 제안은 기능 로드맵 시트에 등급을 달아 백로그로 보내고 현재 단계 작업에 끼워 넣지 않는다
-- 정기적으로(주 1회 권장) 동작 빌드를 오너가 검토하고, 피드백 1건 이상 반영
+- 단계마다 동작 빌드를 오너가 검토하고, 피드백 1건 이상 반영 (기한 없음, D-33)
 - 사양 값(치수·정격)은 카탈로그·도면 확인값만 입력, 미확인은 verified=false
 - 스키마 변경은 마이그레이션과 함께, schema 버전 올림
 - Claude가 코드를 쓸 때는 앱 저장소의 CLAUDE.md(이 문서 2·4·5장 + 코드 규약)를 먼저 읽는다

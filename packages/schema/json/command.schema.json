@@ -1,0 +1,2093 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "select"
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      },
+      "required": [
+        "cmd",
+        "ids"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "move"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "transform": {
+          "type": "object",
+          "properties": {
+            "position": {
+              "default": [
+                0,
+                0,
+                0
+              ],
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                },
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                },
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "rotation": {
+              "default": [
+                0,
+                0,
+                0
+              ],
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number",
+                  "description": "각도 (deg)"
+                },
+                {
+                  "type": "number",
+                  "description": "각도 (deg)"
+                },
+                {
+                  "type": "number",
+                  "description": "각도 (deg)"
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            }
+          }
+        }
+      },
+      "required": [
+        "cmd",
+        "id",
+        "transform"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "snap"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "socket": {
+          "type": "string"
+        },
+        "targetId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "targetSocket": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "cmd",
+        "id",
+        "socket",
+        "targetId",
+        "targetSocket"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "group"
+        },
+        "ids": {
+          "minItems": 2,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        },
+        "name": {
+          "default": "Group",
+          "type": "string"
+        }
+      },
+      "required": [
+        "cmd",
+        "ids"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "ungroup"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        }
+      },
+      "required": [
+        "cmd",
+        "id"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "duplicate"
+        },
+        "ids": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        },
+        "offset": {
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number",
+              "description": "길이 (mm)"
+            },
+            {
+              "type": "number",
+              "description": "길이 (mm)"
+            },
+            {
+              "type": "number",
+              "description": "길이 (mm)"
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        }
+      },
+      "required": [
+        "cmd",
+        "ids"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "mirror"
+        },
+        "ids": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        },
+        "plane": {
+          "type": "string",
+          "enum": [
+            "xz",
+            "yz"
+          ]
+        }
+      },
+      "required": [
+        "cmd",
+        "ids",
+        "plane"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "array"
+        },
+        "ids": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 9007199254740991
+        },
+        "step": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number",
+              "description": "길이 (mm)"
+            },
+            {
+              "type": "number",
+              "description": "길이 (mm)"
+            },
+            {
+              "type": "number",
+              "description": "길이 (mm)"
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        }
+      },
+      "required": [
+        "cmd",
+        "ids",
+        "count",
+        "step"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "remove"
+        },
+        "ids": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      },
+      "required": [
+        "cmd",
+        "ids"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "rename"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "cmd",
+        "id",
+        "name"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "set_reference"
+        },
+        "asset": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "image",
+            "dxf"
+          ]
+        },
+        "plane": {
+          "default": "floor",
+          "type": "string",
+          "enum": [
+            "floor",
+            "side"
+          ]
+        },
+        "scalePoints": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "items": false,
+              "minItems": 2,
+              "maxItems": 2
+            },
+            {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "items": false,
+              "minItems": 2,
+              "maxItems": 2
+            }
+          ],
+          "items": false,
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "scaleDistance": {
+          "description": "두 점 사이 실제 거리 (mm)",
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [
+        "cmd",
+        "asset",
+        "kind"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "measure"
+        },
+        "from": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number",
+              "description": "길이 (mm)"
+            },
+            {
+              "type": "number",
+              "description": "길이 (mm)"
+            },
+            {
+              "type": "number",
+              "description": "길이 (mm)"
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "to": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number",
+              "description": "길이 (mm)"
+            },
+            {
+              "type": "number",
+              "description": "길이 (mm)"
+            },
+            {
+              "type": "number",
+              "description": "길이 (mm)"
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        }
+      },
+      "required": [
+        "cmd",
+        "from",
+        "to"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "check_collision"
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      },
+      "required": [
+        "cmd"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "undo"
+        }
+      },
+      "required": [
+        "cmd"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "redo"
+        }
+      },
+      "required": [
+        "cmd"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "save"
+        },
+        "message": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "required": [
+        "cmd"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "export"
+        },
+        "format": {
+          "type": "string",
+          "enum": [
+            "json",
+            "glb",
+            "dxf",
+            "xlsx_io",
+            "pdf",
+            "card"
+          ]
+        }
+      },
+      "required": [
+        "cmd",
+        "format"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "set_bbox"
+        },
+        "bbox": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        }
+      },
+      "required": [
+        "cmd",
+        "bbox"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "add_block"
+        },
+        "blockType": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
+        },
+        "params": {
+          "default": {},
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {}
+        },
+        "transform": {
+          "default": {},
+          "type": "object",
+          "properties": {
+            "position": {
+              "default": [
+                0,
+                0,
+                0
+              ],
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                },
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                },
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "rotation": {
+              "default": [
+                0,
+                0,
+                0
+              ],
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number",
+                  "description": "각도 (deg)"
+                },
+                {
+                  "type": "number",
+                  "description": "각도 (deg)"
+                },
+                {
+                  "type": "number",
+                  "description": "각도 (deg)"
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            }
+          }
+        },
+        "parent": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "cmd",
+        "blockType"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "set_param"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "key": {
+          "type": "string"
+        },
+        "value": {
+          "type": [
+            "number",
+            "boolean",
+            "string"
+          ]
+        }
+      },
+      "required": [
+        "cmd",
+        "id",
+        "key",
+        "value"
+      ],
+      "description": "값 검증은 블록 정의의 params 로"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "load_glb"
+        },
+        "asset": {
+          "type": "string"
+        },
+        "transform": {
+          "default": {},
+          "type": "object",
+          "properties": {
+            "position": {
+              "default": [
+                0,
+                0,
+                0
+              ],
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                },
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                },
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "rotation": {
+              "default": [
+                0,
+                0,
+                0
+              ],
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number",
+                  "description": "각도 (deg)"
+                },
+                {
+                  "type": "number",
+                  "description": "각도 (deg)"
+                },
+                {
+                  "type": "number",
+                  "description": "각도 (deg)"
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            }
+          }
+        }
+      },
+      "required": [
+        "cmd",
+        "asset"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "load_urdf"
+        },
+        "asset": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "cmd",
+        "asset"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "add_joint"
+        },
+        "node": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "rot",
+            "lin",
+            "surface"
+          ]
+        },
+        "axis": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "onoff",
+            "position",
+            "continuous"
+          ]
+        },
+        "min": {
+          "default": 0,
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "vmax": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "amax": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [
+        "cmd",
+        "node",
+        "type",
+        "axis",
+        "mode",
+        "max",
+        "vmax",
+        "amax"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "set_joint"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "patch": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "rot",
+                "lin",
+                "surface"
+              ]
+            },
+            "axis": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "onoff",
+                "position",
+                "continuous"
+              ]
+            },
+            "min": {
+              "default": 0,
+              "description": "lin: mm, rot: deg. surface 는 쓰지 않음",
+              "type": "number"
+            },
+            "max": {
+              "description": "rot·lin 필수",
+              "type": "number"
+            },
+            "home": {
+              "default": 0,
+              "type": "number"
+            },
+            "vmax": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "mm/s 또는 deg/s"
+            },
+            "amax": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "mm/s² 또는 deg/s²"
+            },
+            "jmax": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "effort": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "verified": {
+              "default": {},
+              "type": "object",
+              "properties": {
+                "vmax": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "amax": {
+                  "default": false,
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "cmd",
+        "id",
+        "patch"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "bind_tag"
+        },
+        "tag": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32,
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "joint",
+            "sensor",
+            "process",
+            "carrier",
+            "trajectory"
+          ]
+        },
+        "target": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        }
+      },
+      "required": [
+        "cmd",
+        "tag",
+        "kind",
+        "target"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "rename_tag"
+        },
+        "from": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32,
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "to": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32,
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        }
+      },
+      "required": [
+        "cmd",
+        "from",
+        "to"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "import_io"
+        },
+        "asset": {
+          "type": "string",
+          "description": "I/O 리스트 엑셀"
+        }
+      },
+      "required": [
+        "cmd",
+        "asset"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "add_work"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "work",
+            "source",
+            "sink",
+            "carrier"
+          ]
+        },
+        "transform": {
+          "default": {},
+          "type": "object",
+          "properties": {
+            "position": {
+              "default": [
+                0,
+                0,
+                0
+              ],
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                },
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                },
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "rotation": {
+              "default": [
+                0,
+                0,
+                0
+              ],
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number",
+                  "description": "각도 (deg)"
+                },
+                {
+                  "type": "number",
+                  "description": "각도 (deg)"
+                },
+                {
+                  "type": "number",
+                  "description": "각도 (deg)"
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            }
+          }
+        },
+        "params": {
+          "default": {},
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {}
+        }
+      },
+      "required": [
+        "cmd",
+        "kind"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "attach"
+        },
+        "tool": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "work": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        }
+      },
+      "required": [
+        "cmd",
+        "tool",
+        "work"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "detach"
+        },
+        "tool": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        }
+      },
+      "required": [
+        "cmd",
+        "tool"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "set_sequence"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "set": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "tag": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 32,
+                      "pattern": "^[A-Z][A-Z0-9_]*$"
+                    },
+                    "value": {
+                      "type": [
+                        "boolean",
+                        "number"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "tag",
+                    "value"
+                  ]
+                }
+              },
+              "wait": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "tag": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 32,
+                      "pattern": "^[A-Z][A-Z0-9_]*$"
+                    },
+                    "value": {
+                      "type": [
+                        "boolean",
+                        "number"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "tag",
+                    "value"
+                  ]
+                }
+              },
+              "timeout_ms": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      },
+      "required": [
+        "cmd",
+        "steps"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "force_tag"
+        },
+        "tag": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32,
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "value": {
+          "type": [
+            "boolean",
+            "number"
+          ]
+        }
+      },
+      "required": [
+        "cmd",
+        "tag",
+        "value"
+      ],
+      "description": "수동 조작 패널"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "set_fidelity"
+        },
+        "fidelity": {
+          "type": "string",
+          "enum": [
+            "L1",
+            "L2",
+            "L3"
+          ]
+        }
+      },
+      "required": [
+        "cmd",
+        "fidelity"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "make_card"
+        }
+      },
+      "required": [
+        "cmd"
+      ],
+      "description": "설비 카드(L1) 생성 → 팩토리 라이브러리 등록"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "add_level"
+        },
+        "name": {
+          "type": "string"
+        },
+        "elevation": {
+          "default": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "cmd",
+        "name"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "draw_slab"
+        },
+        "level": {
+          "type": "string"
+        },
+        "polygon": {
+          "minItems": 3,
+          "type": "array",
+          "items": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "items": false,
+            "minItems": 2,
+            "maxItems": 2
+          }
+        }
+      },
+      "required": [
+        "cmd",
+        "level",
+        "polygon"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "draw_wall"
+        },
+        "level": {
+          "type": "string"
+        },
+        "polyline": {
+          "minItems": 2,
+          "type": "array",
+          "items": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "items": false,
+            "minItems": 2,
+            "maxItems": 2
+          }
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "thickness": {
+          "default": 200,
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [
+        "cmd",
+        "level",
+        "polyline",
+        "height"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "place_columns"
+        },
+        "level": {
+          "type": "string"
+        },
+        "origin": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "items": false,
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "pitch": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "items": false,
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "count": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          ],
+          "items": false,
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [
+        "cmd",
+        "level",
+        "origin",
+        "pitch",
+        "count",
+        "height"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "add_opening"
+        },
+        "wall": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "door",
+            "shutter",
+            "dock",
+            "emergency_exit",
+            "window"
+          ]
+        },
+        "offset": {
+          "type": "number"
+        },
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [
+        "cmd",
+        "wall",
+        "kind",
+        "offset",
+        "width",
+        "height"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "draw_marking"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "aisle",
+            "zone",
+            "safety"
+          ]
+        },
+        "points": {
+          "minItems": 2,
+          "type": "array",
+          "items": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "items": false,
+            "minItems": 2,
+            "maxItems": 2
+          }
+        }
+      },
+      "required": [
+        "cmd",
+        "kind",
+        "points"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "place_machine"
+        },
+        "ref": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}@\\d+\\.\\d+\\.\\d+$"
+        },
+        "transform": {
+          "default": {},
+          "type": "object",
+          "properties": {
+            "position": {
+              "default": [
+                0,
+                0,
+                0
+              ],
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                },
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                },
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "rotation": {
+              "default": [
+                0,
+                0,
+                0
+              ],
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number",
+                  "description": "각도 (deg)"
+                },
+                {
+                  "type": "number",
+                  "description": "각도 (deg)"
+                },
+                {
+                  "type": "number",
+                  "description": "각도 (deg)"
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            }
+          }
+        },
+        "tagPrefix": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*\\.[A-Z][A-Z0-9_]*$"
+        }
+      },
+      "required": [
+        "cmd",
+        "ref"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "set_card_override"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "patch": {
+          "type": "object",
+          "properties": {
+            "cycle_time": {
+              "type": "number",
+              "minimum": 0,
+              "description": "초"
+            },
+            "ok_rate": {
+              "default": 1,
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "footprint": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                },
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                }
+              ],
+              "items": false,
+              "minItems": 2,
+              "maxItems": 2,
+              "description": "[W, D] mm"
+            },
+            "operators": {
+              "default": 0,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "inlet": {
+              "default": null,
+              "description": "inlet 소켓 id",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "outlet": {
+              "default": null,
+              "description": "outlet 소켓 id",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        }
+      },
+      "required": [
+        "cmd",
+        "id",
+        "patch"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "connect_flow"
+        },
+        "from": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        },
+        "ratio": {
+          "default": 1,
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "cmd",
+        "from",
+        "to"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "add_storage"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "rack",
+            "floor",
+            "buffer"
+          ]
+        },
+        "transform": {
+          "default": {},
+          "type": "object",
+          "properties": {
+            "position": {
+              "default": [
+                0,
+                0,
+                0
+              ],
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                },
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                },
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "rotation": {
+              "default": [
+                0,
+                0,
+                0
+              ],
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number",
+                  "description": "각도 (deg)"
+                },
+                {
+                  "type": "number",
+                  "description": "각도 (deg)"
+                },
+                {
+                  "type": "number",
+                  "description": "각도 (deg)"
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            }
+          }
+        },
+        "capacity": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "cmd",
+        "kind",
+        "capacity"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "add_mover"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "worker",
+            "amr",
+            "forklift"
+          ]
+        },
+        "home": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number",
+              "description": "길이 (mm)"
+            },
+            {
+              "type": "number",
+              "description": "길이 (mm)"
+            },
+            {
+              "type": "number",
+              "description": "길이 (mm)"
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "params": {
+          "default": {},
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {}
+        }
+      },
+      "required": [
+        "cmd",
+        "kind",
+        "home"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "build_nav"
+        }
+      },
+      "required": [
+        "cmd"
+      ],
+      "description": "바닥 마킹 → 네비 그래프 자동 생성"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "add_drop"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "power",
+            "air"
+          ]
+        },
+        "position": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number",
+              "description": "길이 (mm)"
+            },
+            {
+              "type": "number",
+              "description": "길이 (mm)"
+            },
+            {
+              "type": "number",
+              "description": "길이 (mm)"
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        }
+      },
+      "required": [
+        "cmd",
+        "kind",
+        "position"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "run_demo"
+        },
+        "speed": {
+          "default": 1,
+          "type": "number",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "seed": {
+          "default": 1,
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "cmd"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "stop"
+        }
+      },
+      "required": [
+        "cmd"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "create_scenario"
+        },
+        "name": {
+          "type": "string"
+        },
+        "overrides": {
+          "default": {},
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {}
+        },
+        "duration_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "runs": {
+          "default": 1,
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "seed": {
+          "default": 1,
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "cmd",
+        "name",
+        "duration_s"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "run_scenario"
+        },
+        "scenario": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        }
+      },
+      "required": [
+        "cmd",
+        "scenario"
+      ],
+      "description": "서버 헤드리스 정식 실행"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "compare"
+        },
+        "scenarios": {
+          "minItems": 2,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      },
+      "required": [
+        "cmd",
+        "scenarios"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "replay"
+        },
+        "scenario": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "run": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "cmd",
+        "scenario"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "type": "string",
+          "const": "optimize"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "layout",
+            "buffer",
+            "balancing"
+          ]
+        },
+        "scenario": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "generations": {
+          "default": 20,
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "cmd",
+        "kind",
+        "scenario"
+      ]
+    }
+  ],
+  "$id": "https://bse-digital-twin/schema/command.schema.json"
+}

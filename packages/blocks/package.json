@@ -1,0 +1,19 @@
+{
+  "name": "@bse/blocks",
+  "version": "0.1.0",
+  "private": true,
+  "description": "블록 정의 · 지오메트리 함수 · 치수 테이블. 기준 설비 3종을 재현하면서 채운다 (목록부터 채우지 않음)",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@bse/schema": "workspace:*"
+  }
+}

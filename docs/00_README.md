@@ -40,6 +40,7 @@
 | **11** | [**BSE : Digital Twin 개발 지침서 R1**](11_BSE_DT_DEV_STANDARD.md) | **빌더 앱을 어떻게 만들지 정하는 최상위 개발 지침 (일정 없음, 프로젝트 내내 적용)** | 다른 모든 문서가 이 문서를 따름 | 오너 | MR, RS, OT |
 | 12 | [지침서 검토](12_STANDARD_REVIEW.md) | 지침서의 효율·대안 검토 | R2 후보 | MR | RS, OT |
 | 13 | [화면 지도](13_SCREEN_MAP.md) | 지침서대로 만들 때 생기는 화면 목록 | 개발 순서와 화면 대응 | PD | MR |
+| 14 | [편집 명령 목록](14_EDIT_COMMANDS.md) | 빌더의 명령 API 54개 (코드에서 생성) | UI·AI·MCP 공통 입구 | MR | RS, PD |
 | — | [standard/](standard/) | 블록·장비·기능 엑셀 4개, 앱용 CLAUDE.md | 11의 부속 문서 | 오너 | MR |
 
 ## 읽는 순서

@@ -1,0 +1,6 @@
+landing/
+docs/
+*.md
+pnpm-lock.yaml
+dist/
+packages/schema/json/

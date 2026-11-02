@@ -1,0 +1,1143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "bse-twin/factory@1"
+    },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "site": {
+          "default": "",
+          "type": "string"
+        },
+        "levels": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "elevation": {
+                "default": 0,
+                "type": "number",
+                "description": "길이 (mm)"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ]
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "reference": {
+      "default": null,
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "dxf",
+                "image"
+              ]
+            },
+            "asset": {
+              "type": "string",
+              "minLength": 1
+            },
+            "scale": {
+              "default": 1,
+              "description": "도면 단위 → mm",
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "origin": {
+              "default": [
+                0,
+                0
+              ],
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                },
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                }
+              ],
+              "items": false,
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "required": [
+            "kind",
+            "asset"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "building": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "slabs": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              "level": {
+                "type": "string"
+              },
+              "polygon": {
+                "minItems": 3,
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "type": "number",
+                      "description": "길이 (mm)"
+                    },
+                    {
+                      "type": "number",
+                      "description": "길이 (mm)"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "thickness": {
+                "default": 150,
+                "type": "number",
+                "description": "길이 (mm)"
+              }
+            },
+            "required": [
+              "id",
+              "level",
+              "polygon"
+            ]
+          }
+        },
+        "walls": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              "level": {
+                "type": "string"
+              },
+              "polyline": {
+                "minItems": 2,
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "type": "number",
+                      "description": "길이 (mm)"
+                    },
+                    {
+                      "type": "number",
+                      "description": "길이 (mm)"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "height": {
+                "type": "number",
+                "description": "길이 (mm)"
+              },
+              "thickness": {
+                "default": 200,
+                "type": "number",
+                "description": "길이 (mm)"
+              }
+            },
+            "required": [
+              "id",
+              "level",
+              "polyline",
+              "height"
+            ]
+          }
+        },
+        "columns": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              "level": {
+                "type": "string"
+              },
+              "position": {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  },
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  }
+                ],
+                "items": false,
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "size": {
+                "default": [
+                  500,
+                  500
+                ],
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  },
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  }
+                ],
+                "items": false,
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "height": {
+                "type": "number",
+                "description": "길이 (mm)"
+              }
+            },
+            "required": [
+              "id",
+              "level",
+              "position",
+              "height"
+            ]
+          }
+        },
+        "roofs": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              "polygon": {
+                "minItems": 3,
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "type": "number",
+                      "description": "길이 (mm)"
+                    },
+                    {
+                      "type": "number",
+                      "description": "길이 (mm)"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "height": {
+                "type": "number",
+                "description": "길이 (mm)"
+              }
+            },
+            "required": [
+              "id",
+              "polygon",
+              "height"
+            ]
+          }
+        },
+        "openings": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              "wall": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "door",
+                  "shutter",
+                  "dock",
+                  "emergency_exit",
+                  "window"
+                ]
+              },
+              "offset": {
+                "type": "number",
+                "description": "벽 시작점에서의 거리"
+              },
+              "width": {
+                "type": "number",
+                "description": "길이 (mm)"
+              },
+              "height": {
+                "type": "number",
+                "description": "길이 (mm)"
+              }
+            },
+            "required": [
+              "id",
+              "wall",
+              "kind",
+              "offset",
+              "width",
+              "height"
+            ]
+          }
+        }
+      }
+    },
+    "markings": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "aisle",
+              "zone",
+              "safety"
+            ]
+          },
+          "polyline": {
+            "minItems": 2,
+            "type": "array",
+            "items": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                },
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                }
+              ],
+              "items": false,
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "polygon": {
+            "minItems": 3,
+            "type": "array",
+            "items": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                },
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                }
+              ],
+              "items": false,
+              "minItems": 2,
+              "maxItems": 2
+            }
+          }
+        },
+        "required": [
+          "id",
+          "kind"
+        ]
+      }
+    },
+    "machines": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "ref": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}@\\d+\\.\\d+\\.\\d+$"
+          },
+          "transform": {
+            "default": {},
+            "type": "object",
+            "properties": {
+              "position": {
+                "default": [
+                  0,
+                  0,
+                  0
+                ],
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  },
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  },
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  }
+                ],
+                "items": false,
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "rotation": {
+                "default": [
+                  0,
+                  0,
+                  0
+                ],
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number",
+                    "description": "각도 (deg)"
+                  },
+                  {
+                    "type": "number",
+                    "description": "각도 (deg)"
+                  },
+                  {
+                    "type": "number",
+                    "description": "각도 (deg)"
+                  }
+                ],
+                "items": false,
+                "minItems": 3,
+                "maxItems": 3
+              }
+            },
+            "description": "부모 기준 변환. 설비 원점 = 바닥면 중심, 공장 원점 = 평면도 원점"
+          },
+          "tagPrefix": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*\\.[A-Z][A-Z0-9_]*$"
+          },
+          "cardOverride": {
+            "default": {},
+            "type": "object",
+            "properties": {
+              "cycle_time": {
+                "type": "number",
+                "minimum": 0,
+                "description": "초"
+              },
+              "ok_rate": {
+                "default": 1,
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "footprint": {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  },
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  }
+                ],
+                "items": false,
+                "minItems": 2,
+                "maxItems": 2,
+                "description": "[W, D] mm"
+              },
+              "operators": {
+                "default": 0,
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "inlet": {
+                "default": null,
+                "description": "inlet 소켓 id",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "outlet": {
+                "default": null,
+                "description": "outlet 소켓 id",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          },
+          "fidelityOverride": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "L1",
+                  "L2",
+                  "L3"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "ref",
+          "tagPrefix"
+        ]
+      }
+    },
+    "flows": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "from": {
+            "type": "string",
+            "pattern": "^[0-9a-f-]{36}\\.[A-Za-z0-9_-]+$"
+          },
+          "to": {
+            "type": "string",
+            "pattern": "^[0-9a-f-]{36}\\.[A-Za-z0-9_-]+$"
+          },
+          "ratio": {
+            "default": 1,
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "required": [
+          "id",
+          "from",
+          "to"
+        ]
+      }
+    },
+    "storage": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "rack",
+              "floor",
+              "buffer"
+            ]
+          },
+          "transform": {
+            "default": {},
+            "type": "object",
+            "properties": {
+              "position": {
+                "default": [
+                  0,
+                  0,
+                  0
+                ],
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  },
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  },
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  }
+                ],
+                "items": false,
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "rotation": {
+                "default": [
+                  0,
+                  0,
+                  0
+                ],
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number",
+                    "description": "각도 (deg)"
+                  },
+                  {
+                    "type": "number",
+                    "description": "각도 (deg)"
+                  },
+                  {
+                    "type": "number",
+                    "description": "각도 (deg)"
+                  }
+                ],
+                "items": false,
+                "minItems": 3,
+                "maxItems": 3
+              }
+            },
+            "description": "부모 기준 변환. 설비 원점 = 바닥면 중심, 공장 원점 = 평면도 원점"
+          },
+          "capacity": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "capacity"
+        ]
+      }
+    },
+    "movers": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "worker",
+              "amr",
+              "forklift"
+            ]
+          },
+          "params": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          },
+          "home": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "number",
+                "description": "길이 (mm)"
+              },
+              {
+                "type": "number",
+                "description": "길이 (mm)"
+              },
+              {
+                "type": "number",
+                "description": "길이 (mm)"
+              }
+            ],
+            "items": false,
+            "minItems": 3,
+            "maxItems": 3
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "home"
+        ]
+      }
+    },
+    "nav": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "nodes": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "position": {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  },
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  }
+                ],
+                "items": false,
+                "minItems": 2,
+                "maxItems": 2
+              }
+            },
+            "required": [
+              "id",
+              "position"
+            ]
+          }
+        },
+        "edges": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "string"
+              },
+              "to": {
+                "type": "string"
+              },
+              "bidirectional": {
+                "default": true,
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "from",
+              "to"
+            ]
+          }
+        },
+        "docks": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "node": {
+                "type": "string"
+              },
+              "target": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              }
+            },
+            "required": [
+              "id",
+              "node",
+              "target"
+            ]
+          }
+        }
+      }
+    },
+    "utilities": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "drops": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "power",
+                  "air"
+                ]
+              },
+              "position": {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  },
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  },
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  }
+                ],
+                "items": false,
+                "minItems": 3,
+                "maxItems": 3
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "position"
+            ]
+          }
+        },
+        "panels": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              "position": {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  },
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  },
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  }
+                ],
+                "items": false,
+                "minItems": 3,
+                "maxItems": 3
+              }
+            },
+            "required": [
+              "id",
+              "position"
+            ]
+          }
+        },
+        "supply": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              "kind": {
+                "type": "string"
+              },
+              "position": {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  },
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  },
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  }
+                ],
+                "items": false,
+                "minItems": 3,
+                "maxItems": 3
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "position"
+            ]
+          }
+        }
+      }
+    },
+    "spec": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "electrical": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "visible": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "capacity_kw": {
+                  "default": null,
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "diversity": {
+                  "default": 1,
+                  "description": "동시율",
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pneumatic": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "visible": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "capacity_nl_min": {
+                  "default": null,
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "diversity": {
+                  "default": 1,
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "gas": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "visible": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "capacity": {
+                  "default": null,
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "water": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "visible": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "capacity_l_min": {
+                  "default": null,
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "meta": {
+          "default": {},
+          "type": "object",
+          "properties": {
+            "spec_version": {
+              "default": "1.0",
+              "type": "string"
+            },
+            "verified": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "ext": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "aas": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "usd": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "required": [
+    "schema",
+    "meta"
+  ],
+  "$id": "https://bse-digital-twin/schema/factory.schema.json"
+}

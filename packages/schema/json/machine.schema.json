@@ -1,0 +1,1871 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "bse-twin/machine@1"
+    },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bbox": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number",
+              "description": "길이 (mm)"
+            },
+            {
+              "type": "number",
+              "description": "길이 (mm)"
+            },
+            {
+              "type": "number",
+              "description": "길이 (mm)"
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3,
+          "description": "[W, D, H] mm, 외곽 가이드 박스"
+        },
+        "fidelity": {
+          "default": "L1",
+          "type": "string",
+          "enum": [
+            "L1",
+            "L2",
+            "L3"
+          ],
+          "description": "L1 카드 | L2 기구·신호 | L3 물리"
+        },
+        "thumbnail": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "version": {
+          "default": "0.1.0",
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "bbox"
+      ]
+    },
+    "card": {
+      "type": "object",
+      "properties": {
+        "cycle_time": {
+          "type": "number",
+          "minimum": 0,
+          "description": "초"
+        },
+        "ok_rate": {
+          "default": 1,
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "footprint": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number",
+              "description": "길이 (mm)"
+            },
+            {
+              "type": "number",
+              "description": "길이 (mm)"
+            }
+          ],
+          "items": false,
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "[W, D] mm"
+        },
+        "operators": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inlet": {
+          "default": null,
+          "description": "inlet 소켓 id",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "outlet": {
+          "default": null,
+          "description": "outlet 소켓 id",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "cycle_time",
+        "footprint"
+      ]
+    },
+    "nodes": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "block",
+              "glb",
+              "group"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "blockType": {
+            "default": null,
+            "description": "type=block 일 때 블록 타입 id",
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "params": {
+            "default": {},
+            "description": "블록 파라미터 (블록 정의의 params 스키마로 검증)",
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          },
+          "glb": {
+            "default": null,
+            "description": "type=glb 일 때 에셋 참조",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "transform": {
+            "default": {},
+            "type": "object",
+            "properties": {
+              "position": {
+                "default": [
+                  0,
+                  0,
+                  0
+                ],
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  },
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  },
+                  {
+                    "type": "number",
+                    "description": "길이 (mm)"
+                  }
+                ],
+                "items": false,
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "rotation": {
+                "default": [
+                  0,
+                  0,
+                  0
+                ],
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number",
+                    "description": "각도 (deg)"
+                  },
+                  {
+                    "type": "number",
+                    "description": "각도 (deg)"
+                  },
+                  {
+                    "type": "number",
+                    "description": "각도 (deg)"
+                  }
+                ],
+                "items": false,
+                "minItems": 3,
+                "maxItems": 3
+              }
+            },
+            "description": "부모 기준 변환. 설비 원점 = 바닥면 중심, 공장 원점 = 평면도 원점"
+          },
+          "parent": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sockets": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "mount",
+                    "inlet",
+                    "outlet",
+                    "surface",
+                    "tool"
+                  ]
+                },
+                "position": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "type": "number",
+                      "description": "길이 (mm)"
+                    },
+                    {
+                      "type": "number",
+                      "description": "길이 (mm)"
+                    },
+                    {
+                      "type": "number",
+                      "description": "길이 (mm)"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "normal": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "compatible": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "mount",
+                      "inlet",
+                      "outlet",
+                      "surface",
+                      "tool"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "kind",
+                "position",
+                "normal"
+              ]
+            }
+          },
+          "components": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "name"
+        ]
+      }
+    },
+    "joints": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "node": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "rot",
+              "lin",
+              "surface"
+            ]
+          },
+          "axis": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "items": false,
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "onoff",
+              "position",
+              "continuous"
+            ]
+          },
+          "min": {
+            "default": 0,
+            "description": "lin: mm, rot: deg. surface 는 쓰지 않음",
+            "type": "number"
+          },
+          "max": {
+            "description": "rot·lin 필수",
+            "type": "number"
+          },
+          "home": {
+            "default": 0,
+            "type": "number"
+          },
+          "vmax": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "mm/s 또는 deg/s"
+          },
+          "amax": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "mm/s² 또는 deg/s²"
+          },
+          "jmax": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "effort": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "verified": {
+            "default": {},
+            "type": "object",
+            "properties": {
+              "vmax": {
+                "default": false,
+                "type": "boolean"
+              },
+              "amax": {
+                "default": false,
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "required": [
+          "id",
+          "node",
+          "type",
+          "axis",
+          "mode",
+          "vmax",
+          "amax"
+        ]
+      }
+    },
+    "robot": {
+      "default": null,
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "urdf": {
+              "type": "string",
+              "description": "URDF 에셋 참조"
+            },
+            "tcp": {
+              "default": [
+                0,
+                0,
+                0
+              ],
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                },
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                },
+                {
+                  "type": "number",
+                  "description": "길이 (mm)"
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "tcp_vmax": {
+              "type": "number",
+              "minimum": 0,
+              "description": "속도 (mm/s)"
+            },
+            "tcp_amax": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "payload": {
+              "type": "number",
+              "minimum": 0,
+              "description": "kg"
+            },
+            "derating": {
+              "default": [],
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "payload": {
+                    "type": "number"
+                  },
+                  "factor": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                },
+                "required": [
+                  "payload",
+                  "factor"
+                ]
+              }
+            },
+            "override": {
+              "default": 100,
+              "type": "number",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          "required": [
+            "urdf",
+            "tcp_vmax",
+            "tcp_amax",
+            "payload"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "trajectories": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "segments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "PTP",
+                    "LIN",
+                    "CIRC",
+                    "PATH"
+                  ]
+                },
+                "points": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "array",
+                        "prefixItems": [
+                          {
+                            "type": "number",
+                            "description": "길이 (mm)"
+                          },
+                          {
+                            "type": "number",
+                            "description": "길이 (mm)"
+                          },
+                          {
+                            "type": "number",
+                            "description": "길이 (mm)"
+                          }
+                        ],
+                        "items": false,
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "number",
+                          "description": "각도 (deg)"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "speed": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "blend": {
+                  "default": 0,
+                  "type": "number",
+                  "minimum": 0
+                },
+                "tool": {
+                  "default": null,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "points"
+              ]
+            }
+          },
+          "process": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "segment": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "tag": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 32,
+                  "pattern": "^[A-Z][A-Z0-9_]*$"
+                },
+                "params": {
+                  "default": {},
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {}
+                }
+              },
+              "required": [
+                "segment",
+                "tag"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "segments"
+        ]
+      }
+    },
+    "io": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tag": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32,
+            "pattern": "^[A-Z][A-Z0-9_]*$"
+          },
+          "dir": {
+            "type": "string",
+            "enum": [
+              "in",
+              "out"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "bool",
+              "int",
+              "real"
+            ]
+          },
+          "binding": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "joint",
+                      "sensor",
+                      "process",
+                      "carrier",
+                      "trajectory"
+                    ]
+                  },
+                  "target": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+                    "description": "관절·센서·공정 노드 id"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "target"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "tag",
+          "dir",
+          "type"
+        ]
+      }
+    },
+    "sequence": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "steps": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "set": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "tag": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 32,
+                      "pattern": "^[A-Z][A-Z0-9_]*$"
+                    },
+                    "value": {
+                      "type": [
+                        "boolean",
+                        "number"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "tag",
+                    "value"
+                  ]
+                }
+              },
+              "wait": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "tag": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 32,
+                      "pattern": "^[A-Z][A-Z0-9_]*$"
+                    },
+                    "value": {
+                      "type": [
+                        "boolean",
+                        "number"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "tag",
+                    "value"
+                  ]
+                }
+              },
+              "timeout_ms": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "process": {
+      "default": null,
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "cycle_time": {
+              "type": "number",
+              "minimum": 0,
+              "description": "초"
+            },
+            "ok_rate": {
+              "default": 1,
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "batch_size": {
+              "default": 1,
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "consumable": {
+              "default": null,
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "work_state_in": {
+              "default": null,
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "work_state_out": {
+              "default": null,
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "cycle_time"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "spec": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "electrical": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "visible": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "voltage": {
+                  "default": null,
+                  "description": "V",
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "110",
+                        "220",
+                        "380",
+                        "440",
+                        "480"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "phase": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "1P",
+                        "3P"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "frequency": {
+                  "default": 60,
+                  "description": "Hz",
+                  "type": "number"
+                },
+                "rated_power": {
+                  "default": null,
+                  "description": "kW, 합산 → 설비 → 스테이션 → 분전반",
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "rated_current": {
+                  "default": null,
+                  "description": "A, 합산(동시율)",
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "inrush_current": {
+                  "default": null,
+                  "description": "A",
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "control_voltage": {
+                  "default": "24VDC",
+                  "type": "string"
+                },
+                "control_power": {
+                  "default": null,
+                  "description": "W, 합산 → SMPS",
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "connector": {
+                  "default": null,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "breaker_rating": {
+                  "default": null,
+                  "description": "A",
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "cable_spec": {
+                  "default": null,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "power_drop_ref": {
+                  "default": null,
+                  "description": "다른 개체 id 참조",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "panel_ref": {
+                  "default": null,
+                  "description": "다른 개체 id 참조",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "io": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "visible": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "di_count": {
+                  "default": null,
+                  "description": "자동: io[] 집계",
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "do_count": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ai_count": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ao_count": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "io_list": {
+                  "default": null,
+                  "description": "1차 노출: tag·dir·type 만",
+                  "anyOf": [
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "tag": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 32,
+                            "pattern": "^[A-Z][A-Z0-9_]*$"
+                          },
+                          "dir": {
+                            "type": "string",
+                            "enum": [
+                              "in",
+                              "out"
+                            ]
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "bool",
+                              "int",
+                              "real"
+                            ]
+                          },
+                          "signal": {
+                            "default": null,
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "24V",
+                                  "NPN",
+                                  "PNP",
+                                  "4-20mA",
+                                  "0-10V"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "address": {
+                            "default": null,
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "terminal": {
+                            "default": null,
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "tag",
+                          "dir",
+                          "type"
+                        ]
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "sensor_wiring": {
+                  "default": "2W",
+                  "type": "string",
+                  "enum": [
+                    "2W",
+                    "3W_NPN",
+                    "3W_PNP"
+                  ]
+                },
+                "safety_io": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "tag": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 32,
+                            "pattern": "^[A-Z][A-Z0-9_]*$"
+                          },
+                          "kind": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "tag",
+                          "kind"
+                        ]
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comm": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "visible": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "protocol": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "EtherNet/IP",
+                        "Modbus TCP",
+                        "EtherCAT",
+                        "PROFINET",
+                        "IO-Link",
+                        "RS-485",
+                        "OPC UA",
+                        "MQTT"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ip_address": {
+                  "default": null,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "node_id": {
+                  "default": null,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "port": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "tag_map": {
+                  "default": null,
+                  "description": "실PLC 태그 ↔ 트윈 태그 (섀도)",
+                  "anyOf": [
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "tag": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 32,
+                            "pattern": "^[A-Z][A-Z0-9_]*$"
+                          },
+                          "address": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "tag",
+                          "address"
+                        ]
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "network_ref": {
+                  "default": null,
+                  "description": "다른 개체 id 참조",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "safety_protocol": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "CIP Safety",
+                        "PROFIsafe",
+                        "FSoE",
+                        "hardwired"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pneumatic": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "visible": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "supply_pressure": {
+                  "default": 0.5,
+                  "description": "MPa",
+                  "type": "number"
+                },
+                "air_consumption": {
+                  "default": null,
+                  "description": "NL/min, 합산(동시율) → 컴프레서",
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "port_size": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "M5",
+                        "1/8",
+                        "1/4",
+                        "3/8",
+                        "1/2"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "valve_count": {
+                  "default": null,
+                  "description": "자동: 관절 수",
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "air_drop_ref": {
+                  "default": null,
+                  "description": "다른 개체 id 참조",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hydraulic": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "visible": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "pressure": {
+                  "default": null,
+                  "description": "MPa",
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "flow": {
+                  "default": null,
+                  "description": "L/min",
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "unit_ref": {
+                  "default": null,
+                  "description": "다른 개체 id 참조",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "gas": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "visible": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "type": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "N2",
+                        "Ar",
+                        "CO2",
+                        "O2",
+                        "mix"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "flow": {
+                  "default": null,
+                  "description": "L/min",
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "pressure": {
+                  "default": null,
+                  "description": "MPa",
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "gas_drop_ref": {
+                  "default": null,
+                  "description": "다른 개체 id 참조",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "water": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "visible": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "type": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "cooling",
+                        "supply",
+                        "drain",
+                        "hot"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "flow": {
+                  "default": null,
+                  "description": "L/min",
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "temp": {
+                  "default": null,
+                  "description": "°C",
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "pressure": {
+                  "default": null,
+                  "description": "MPa",
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "exhaust": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "visible": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "flow": {
+                  "default": null,
+                  "description": "m³/h",
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "type": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "fume",
+                        "dust",
+                        "heat"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "safety": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "visible": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "category": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "B"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "pl": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "sil": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "1",
+                        "2",
+                        "3"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "emo_group": {
+                  "default": null,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "physical": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "visible": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "weight": {
+                  "default": null,
+                  "description": "kg, 합산 → 바닥 하중",
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "noise": {
+                  "default": null,
+                  "description": "dB",
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "heat_output": {
+                  "default": null,
+                  "description": "kW, 합산 → 공조",
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "product": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "visible": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "maker": {
+                  "default": null,
+                  "description": "1차 노출",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "model": {
+                  "default": null,
+                  "description": "1차 노출",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "serial": {
+                  "default": null,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "url": {
+                  "default": null,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "manual_ref": {
+                  "default": null,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "cad_ref": {
+                  "default": null,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "price": {
+                  "default": null,
+                  "description": "원",
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "lead_time": {
+                  "default": null,
+                  "description": "일",
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "maintenance": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "visible": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "interval": {
+                  "default": null,
+                  "description": "일",
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "last_date": {
+                  "default": null,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "spare_parts": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "meta": {
+          "default": {},
+          "type": "object",
+          "properties": {
+            "spec_version": {
+              "default": "1.0",
+              "type": "string"
+            },
+            "verified": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "ext": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "aas": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "assetId": {
+                  "type": "string"
+                },
+                "submodelIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "usd": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "primPath": {
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "required": [
+    "schema",
+    "meta",
+    "card"
+  ],
+  "$id": "https://bse-digital-twin/schema/machine.schema.json"
+}

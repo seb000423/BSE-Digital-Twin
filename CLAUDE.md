@@ -6,7 +6,7 @@
 
 ## 1. 제품
 - 제품명 **BSE : Digital Twin**, 앱 이름 **BSE Studio**. 작업 공간: Build(머신빌더 + 팩토리빌더) · Simulate · Evolve(디지털 섀도 + 최적화 피드백, V2)
-- UI 언어 한국어 기본 (영어는 V2). 랜딩 페이지는 별도 저장소이며 이 규칙의 대상이 아님
+- UI 언어 한국어 기본 (영어는 V2). 랜딩 페이지(`landing/`)는 정적 사이트라 이 코드 규칙의 대상이 아님 (D-05)
 
 ## 2. 설계 원칙 (어기지 말 것)
 1. 단일 데이터 모델: 모든 것은 노드 트리 JSON. 편집기 코어 1 + 범위 2(machine·factory) + 모드 3(edit·run·compare)
@@ -30,7 +30,7 @@ packages/blocks     블록 정의·지오메트리 함수·치수 테이블
 services/convert    Python FastAPI: STEP/glb/DXF/URDF/USD/AAS 변환
 services/optimize   Python: pymoo, Optuna
 ```
-- 패키지 경계는 ESLint boundaries 규칙으로 강제. `apps/*`가 `packages/engine` 내부를 직접 import하지 않음
+- 패키지 경계는 ESLint(`no-restricted-imports`, eslint.config.js)로 강제: schema → 의존 없음, blocks → schema, engine → schema·blocks, apps → 셋 다. 공개 API(`@bse/<pkg>`)만 import, 내부 경로 금지
 - 저장소 `seb000423/BSE-Digital-Twin` 하나에 `landing/`(정적 랜딩, 화면 파일만, D-05), `docs/`(프로젝트 문서·지침서), `apps/`·`packages/`(빌더)가 있다. 앱 코드는 처음부터 새로 쓴다. 기존 `BSE_STUDIO`(VEXPLOR AAS Studio 파생, Apache 2.0) 파일은 복사하거나 옮겨 오지 않는다 (D-31). AAS는 IDTA 공식 aas-core3.0 라이브러리 + 우리 매핑, 현장 연결은 게이트웨이(Node-RED·rosbridge) 뒤 WebSocket/MQTT만
 
 ## 4. 데이터 모델 요점
@@ -49,7 +49,7 @@ services/optimize   Python: pymoo, Optuna
 - ID는 UUID v7, 블록 타입 id는 kebab-case
 
 ## 6. 코드 규약
-- TypeScript strict. `any` 금지. 외부 입력은 zod로 검증
+- TypeScript strict. `any` 금지. 외부 입력은 zod(v4)로 검증. 중첩 객체 기본값은 `.prefault({})` (`.default({})`는 안쪽 기본값을 안 채움)
 - 상태: 문서 상태는 zustand + immer 불변 스토어 (zundo로 Undo/Redo). 시뮬 런타임 상태는 별도 버퍼(SharedArrayBuffer), 스토어에 넣지 않음
 - 시뮬 엔진은 결정적: 같은 시드 → 같은 결과. `Math.random` 금지, seedrandom 사용
 - 테스트: 엔진·스키마는 Vitest 단위 테스트 필수. 화면은 Playwright. 게이트는 회귀 테스트 통과가 기준
