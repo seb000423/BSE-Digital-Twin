@@ -87,7 +87,11 @@ export function LitFloor({ size }: { size: number }) {
       uR0: { value: size * 0.5 },
       uR1: { value: size * 1.05 },
     };
-    const m = new THREE.MeshStandardMaterial({ color: LIT.floor, roughness: 0.65, metalness: 0.03 });
+    const m = new THREE.MeshStandardMaterial({
+      color: LIT.floor,
+      roughness: 0.65,
+      metalness: 0.03,
+    });
     m.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, u);
       sh.vertexShader = sh.vertexShader
@@ -213,9 +217,10 @@ export function FlowChips({
     const back = !!rt && rt.signals.has(dirTag) && rt.signals.get(dirTag) === true;
     m.visible = on;
     if (!on) return;
-    phase.current = (phase.current + dt * 0.35 * useEditor.getState().speed * (back ? -1 : 1) + 1) % 1;
+    phase.current =
+      (phase.current + dt * 0.35 * useEditor.getState().speed * (back ? -1 : 1) + 1) % 1;
     for (let i = 0; i < n; i++) {
-      const t = ((i / n + phase.current) % 1 + 1) % 1;
+      const t = (((i / n + phase.current) % 1) + 1) % 1;
       const x = -length / 2 + t * length;
       const edge = Math.min(1, Math.min(t, 1 - t) * 8);
       dummy.position.set(x, 0, height + 6);
@@ -228,7 +233,13 @@ export function FlowChips({
   return (
     <instancedMesh ref={ref} args={[undefined, undefined, n]} visible={false}>
       <boxGeometry args={[70, width * 0.45, 6]} />
-      <meshStandardMaterial color={LIT.glow} emissive={LIT.glow} emissiveIntensity={1.6} transparent opacity={0.85} />
+      <meshStandardMaterial
+        color={LIT.glow}
+        emissive={LIT.glow}
+        emissiveIntensity={1.6}
+        transparent
+        opacity={0.85}
+      />
     </instancedMesh>
   );
 }

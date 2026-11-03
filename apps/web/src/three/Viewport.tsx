@@ -374,7 +374,13 @@ function NodeView({ doc, node }: { doc: Machine; node: MachineNode }) {
           joint={part ? jointNames.find((j) => j.name === part)?.joint : undefined}
         >
           {list.map((p, i) => (
-            <Prim key={i} p={p} selected={selected} h={handlers} glow={glowOf(node, prefix, p, i)} />
+            <Prim
+              key={i}
+              p={p}
+              selected={selected}
+              h={handlers}
+              glow={glowOf(node, prefix, p, i)}
+            />
           ))}
         </PartGroup>
       ))}
@@ -442,7 +448,12 @@ interface PrimHandlers {
 /** 도형 하나. 원기둥은 문서 규약대로 축이 Z 라야 하므로(three 는 Y 축) 안쪽에서 X 축 +90° 돌려 세운다 */
 /** 실사풍에서 빛나는 도형: 타워램프 단(아래부터 R·Y·G), 센서 몸통 — 켜진 태그를 따라 발광 */
 const CONVEYORS = new Set(['roller-conveyor', 'belt-conveyor']);
-function glowOf(node: MachineNode, prefix: string, p: Primitive, i: number): { tag: string; color: string } | null {
+function glowOf(
+  node: MachineNode,
+  prefix: string,
+  p: Primitive,
+  i: number,
+): { tag: string; color: string } | null {
   if (!prefix || p.tone !== 2) return null;
   if (node.blockType === 'tower-lamp') {
     const tier = i - 1; // 0 = 기둥
@@ -489,7 +500,11 @@ function Prim({
       {!lines && glow ? (
         <GlowMaterial tag={glow.tag} color={glow.color} />
       ) : lit ? (
-        <meshStandardMaterial color={LIT.tones[p.tone] ?? LIT.tones[0]} metalness={0.45} roughness={0.5} />
+        <meshStandardMaterial
+          color={LIT.tones[p.tone] ?? LIT.tones[0]}
+          metalness={0.45}
+          roughness={0.5}
+        />
       ) : lines ? (
         // 깊이만 기록하는 가림막: 뒤쪽 선을 숨긴다 (은선 제거). 면 자체는 밀지 않는다(바닥 격자와 깊이가 겹쳐 깜빡이므로)
         <meshBasicMaterial colorWrite={false} />

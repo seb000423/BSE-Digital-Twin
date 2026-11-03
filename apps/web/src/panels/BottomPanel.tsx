@@ -15,7 +15,12 @@ export function BottomPanel() {
   const blockOf = (tag: string): string => {
     const n = doc.nodes.find((x) => {
       const b = x.components['block'];
-      return b && typeof b === 'object' && 'prefix' in b && tag.startsWith(String((b as { prefix: string }).prefix) + '_');
+      return (
+        b &&
+        typeof b === 'object' &&
+        'prefix' in b &&
+        tag.startsWith(String((b as { prefix: string }).prefix) + '_')
+      );
     });
     return n?.name ?? '공통';
   };
@@ -93,8 +98,17 @@ export function BottomPanel() {
                 <tr key={e.tag}>
                   <td className="font-sans text-muted">{blockOf(e.tag)}</td>
                   <td>{e.tag}</td>
-                  <td className="font-sans">{describeTag(e.tag) || <span className="text-dim">—</span>}</td>
-                  <td className="font-sans text-muted" title={e.dir === 'out' ? '우리가 켜고 끄는 신호 (PLC 출력)' : '설비가 알려 주는 값 (PLC 입력)'}>
+                  <td className="font-sans">
+                    {describeTag(e.tag) || <span className="text-dim">—</span>}
+                  </td>
+                  <td
+                    className="font-sans text-muted"
+                    title={
+                      e.dir === 'out'
+                        ? '우리가 켜고 끄는 신호 (PLC 출력)'
+                        : '설비가 알려 주는 값 (PLC 입력)'
+                    }
+                  >
                     {e.dir === 'out' ? '명령' : '상태'}
                     {e.type !== 'bool' && <span className="text-dim"> · 수치</span>}
                   </td>
@@ -131,35 +145,35 @@ export function BottomPanel() {
       <div className="min-w-0 grid grid-rows-[minmax(0,3fr)_minmax(0,2fr)] overflow-hidden">
         <SequencePanel />
         <div className="flex flex-col min-h-0 border-t border-border">
-        <h3 className="panel-h m-0">수동 조작 · 명령 기록</h3>
-        <div className="px-3 py-2 flex flex-wrap gap-1.5 border-b border-border">
-          {running ? (
-            outs.slice(0, 12).map((e) => (
-              <button
-                key={e.tag}
-                type="button"
-                className="btn min-h-7 px-2 mono"
-                aria-pressed={val(e.tag) === '1'}
-                onClick={() => force(e.tag, e.type)}
-              >
-                {e.tag.replace(prefix ? prefix + '_' : '', '')}{' '}
-                {e.type === 'bool' ? (val(e.tag) === '1' ? '●' : '○') : val(e.tag)}
-              </button>
-            ))
-          ) : (
-            <span className="text-muted">
-              위의 모드에서 "실행"을 누르면 태그를 켜고 끌 수 있습니다.
-            </span>
-          )}
-        </div>
-        <div className="overflow-auto flex-1 px-3 py-1.5 mono leading-5">
-          {[...log].reverse().map((l, i) => (
-            <div key={i} className={l.result.ok ? '' : 'text-alarm'}>
-              <span className="text-dim">{l.cmd.cmd}</span> {JSON.stringify(stripCmd(l.cmd))}
-              {!l.result.ok && ` → ${l.result.error}`}
-            </div>
-          ))}
-        </div>
+          <h3 className="panel-h m-0">수동 조작 · 명령 기록</h3>
+          <div className="px-3 py-2 flex flex-wrap gap-1.5 border-b border-border">
+            {running ? (
+              outs.slice(0, 12).map((e) => (
+                <button
+                  key={e.tag}
+                  type="button"
+                  className="btn min-h-7 px-2 mono"
+                  aria-pressed={val(e.tag) === '1'}
+                  onClick={() => force(e.tag, e.type)}
+                >
+                  {e.tag.replace(prefix ? prefix + '_' : '', '')}{' '}
+                  {e.type === 'bool' ? (val(e.tag) === '1' ? '●' : '○') : val(e.tag)}
+                </button>
+              ))
+            ) : (
+              <span className="text-muted">
+                위의 모드에서 "실행"을 누르면 태그를 켜고 끌 수 있습니다.
+              </span>
+            )}
+          </div>
+          <div className="overflow-auto flex-1 px-3 py-1.5 mono leading-5">
+            {[...log].reverse().map((l, i) => (
+              <div key={i} className={l.result.ok ? '' : 'text-alarm'}>
+                <span className="text-dim">{l.cmd.cmd}</span> {JSON.stringify(stripCmd(l.cmd))}
+                {!l.result.ok && ` → ${l.result.error}`}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

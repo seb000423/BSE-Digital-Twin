@@ -24,7 +24,8 @@ export function SequencePanel() {
   return (
     <div className="flex flex-col min-h-0 h-full">
       <h3 className="panel-h m-0">
-        동작 순서 <span className="font-normal">{steps.length ? `${steps.length}단계` : '없음'}</span>
+        동작 순서{' '}
+        <span className="font-normal">{steps.length ? `${steps.length}단계` : '없음'}</span>
         <span className="ml-auto mr-14 flex gap-1.5">
           {auto ? (
             <button
@@ -39,7 +40,11 @@ export function SequencePanel() {
               type="button"
               className="btn btn-primary min-h-6 px-2 text-[11px]"
               disabled={steps.length === 0}
-              title={steps.length === 0 ? '먼저 "자동 만들기"로 순서를 만드세요' : '순서대로 태그를 켜고 끕니다'}
+              title={
+                steps.length === 0
+                  ? '먼저 "자동 만들기"로 순서를 만드세요'
+                  : '순서대로 태그를 켜고 끕니다'
+              }
               onClick={startAuto}
             >
               ▶ 자동 운전
@@ -81,7 +86,10 @@ export function SequencePanel() {
             <div className="min-w-0">
               <div className={i === cur ? 'text-fg font-semibold' : ''}>{s.name || s.id}</div>
               {s.set.length > 0 && (
-                <div className="mono text-[11px] text-muted truncate" title={s.set.map(fmt).join(', ')}>
+                <div
+                  className="mono text-[11px] text-muted truncate"
+                  title={s.set.map(fmt).join(', ')}
+                >
                   {s.set.map(fmt).join(', ')}
                 </div>
               )}

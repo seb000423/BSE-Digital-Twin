@@ -69,7 +69,6 @@ export function App() {
   );
 }
 
-
 function Logo() {
   return (
     <svg

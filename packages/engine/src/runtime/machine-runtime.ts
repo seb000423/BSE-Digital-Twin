@@ -251,8 +251,13 @@ export class MachineRuntime {
       a.entered = true;
     }
     const met = st.wait.every((w) => this.get(w.tag) === w.value);
-    const timedOut = st.timeout_ms !== undefined && (this.time - a.since) * 1000 >= st.timeout_ms - 1e-6;
-    if ((st.wait.length > 0 && met) || timedOut || (st.wait.length === 0 && st.timeout_ms === undefined)) {
+    const timedOut =
+      st.timeout_ms !== undefined && (this.time - a.since) * 1000 >= st.timeout_ms - 1e-6;
+    if (
+      (st.wait.length > 0 && met) ||
+      timedOut ||
+      (st.wait.length === 0 && st.timeout_ms === undefined)
+    ) {
       a.step = a.step + 1 >= steps.length ? (steps.length > 1 ? 1 : 0) : a.step + 1;
       a.entered = false;
     }
