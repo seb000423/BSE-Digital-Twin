@@ -17,3 +17,4 @@ export {
   type MachineTemplate,
   type TemplateId,
 } from './editor/templates.js';
+export { generateSequence } from './editor/sequence.js';

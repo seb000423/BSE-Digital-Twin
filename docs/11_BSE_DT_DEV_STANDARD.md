@@ -131,7 +131,7 @@ BSE : Digital Twin은 웹 브라우저에서 제조 설비와 공장을 3D로 �
   "trajectories": [{"id", "segments": [{"type": "PTP|LIN|CIRC|PATH", "points": [], "speed", "blend", "tool"}],
                     "process": [{"segment", "tag", "params"}]}],
   "io": [{"tag", "dir": "in|out", "type": "bool|int|real", "binding": {"kind": "joint|sensor|process|carrier|trajectory", "target"}}],
-  "sequence": {"steps": []},
+  "sequence": {"steps": []},   // 스텝 = {id, name, set[], wait[], timeout_ms?} (2026-11-03 name 추가, 호환)
   "process": {"cycle_time", "ok_rate", "batch_size", "state_in", "state_out"},
   "spec": {"electrical": null, "io": null, "comm": null, "pneumatic": null, "hydraulic": null, "gas": null,
            "water": null, "exhaust": null, "safety": null, "physical": null, "product": null, "maintenance": null},

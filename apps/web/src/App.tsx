@@ -32,12 +32,11 @@ export function App() {
         <nav aria-label="작업 공간" className="flex gap-1 items-center">
           <a
             href="#home"
-            aria-label="홈"
-            title="홈"
+            title="Studio 홈 (설비·공장 목록)"
             aria-current={view === 'home' ? 'page' : undefined}
-            className="inline-flex items-center justify-center w-9 h-8 rounded-sm text-muted hover:text-fg aria-[current=page]:bg-[rgb(220_235_247/14%)] aria-[current=page]:text-fg"
+            className="px-3 py-1.5 rounded-sm text-sm font-semibold text-muted hover:text-fg aria-[current=page]:bg-[rgb(220_235_247/14%)] aria-[current=page]:text-fg"
           >
-            <HouseIcon />
+            Studio
           </a>
           {NAV.map((n) => (
             <a
@@ -70,25 +69,6 @@ export function App() {
   );
 }
 
-function HouseIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinejoin="round"
-      strokeLinecap="round"
-    >
-      <path d="M3 11.5 12 4l9 7.5" />
-      <path d="M5.5 10v10h13V10" />
-      <path d="M10 20v-6h4v6" />
-    </svg>
-  );
-}
 
 function Logo() {
   return (

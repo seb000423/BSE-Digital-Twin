@@ -51,7 +51,7 @@ export function Simulate() {
       </div>
 
       <div className="flex-1 min-h-0 relative" data-tick={tick}>
-        <Viewport look="lines" />
+        <Viewport look="lit" />
         <div className="absolute left-3 top-2.5 flex flex-col gap-0.5 text-[11px] mono text-muted pointer-events-none">
           <span>
             TIME <b className="text-fg">{rt ? rt.time.toFixed(1) : '0.0'}</b> s · ×{speed}
@@ -77,7 +77,7 @@ export function Simulate() {
           </span>
         </div>
         <div className="absolute right-3 bottom-2.5 text-[11px] text-dim pointer-events-none">
-          면은 숨기고 외곽선만 · 끌면 돌려 보기 · 휠은 확대
+          실사풍 보기 · 끌면 돌려 보기 · 휠은 확대
         </div>
       </div>
 

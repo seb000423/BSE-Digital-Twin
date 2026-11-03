@@ -3,8 +3,9 @@
  * 좌표: 문서는 mm · Z-up, three.js 는 m · Y-up (지침서 5장) → 루트 그룹에서 한 번에 변환한다.
  * 움직임은 런타임(MachineRuntime)의 관절 위치를 매 프레임 읽어서만 반영한다 (스토어에 넣지 않음).
  * 끌어서 옮기기: 블록을 누른 채 끌면 그 높이의 수평면 위에서 움직이고(50 mm 격자), 놓을 때 move 명령 한 번만 보낸다.
- * 보기 두 가지 (04 §9.4): 'solid' = 편집용(옅게 채운 면 + 외곽선, 클릭·끌기),
- * 'lines' = Simulate 용 은선 선화(면은 깊이만 기록해 뒤의 선을 가리고, 외곽선만 보임, 자동 회전).
+ * 보기 세 가지 (04 §9.4·9.5): 'solid' = 편집용(옅게 채운 면 + 외곽선, 클릭·끌기),
+ * 'lines' = 은선 선화(면은 깊이만 기록해 뒤의 선을 가리고, 외곽선만 보임),
+ * 'lit' = Simulate 용 실사풍(그래파이트 설비 + 조명·그림자·블룸, D-39). 장면 부품은 lit.tsx.
  */
 import { createContext, useContext, useEffect, useMemo, useRef } from 'react';
 import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
@@ -14,13 +15,24 @@ import type { Machine, MachineNode } from '@bse/schema';
 import { extents, type Primitive } from '@bse/blocks';
 import { SIGNAL_TICK_MS } from '@bse/engine';
 import { lib, prefixOf, useEditor } from '../store.js';
+import {
+  FlowChips,
+  GlowMaterial,
+  LIT,
+  LitBloom,
+  LitFloor,
+  LitLights,
+  LitMirror,
+  LitRenderer,
+  LitRing,
+} from './lit.js';
 
 const MM = 0.001;
 const TONES = ['#16395c', '#1e4a73', '#2a5f8f'] as const;
 const LINE = '#cfe4f5';
 const SEL = '#ffffff';
 const SNAP = 50;
-export type Look = 'solid' | 'lines';
+export type Look = 'solid' | 'lines' | 'lit';
 const LookCtx = createContext<Look>('solid');
 const deg = (d: number) => (d * Math.PI) / 180;
 
@@ -104,19 +116,23 @@ export function Viewport({
   const bbox = doc.meta.bbox;
   const size = Math.max(bbox[0], bbox[1]) * MM;
   const lines = look === 'lines';
+  const lit = look === 'lit';
   return (
     <Canvas
       dpr={[1, 2]}
-      gl={{ antialias: true, alpha: true }}
+      gl={{ antialias: true, alpha: !lit, powerPreference: 'high-performance' }}
+      shadows={lit}
       onPointerMissed={() => useEditor.getState().dispatch({ cmd: 'select', ids: [] })}
       style={{
-        background:
-          'radial-gradient(ellipse 60% 55% at 50% 60%, rgb(31 78 122 / 90%), transparent)',
+        background: lit
+          ? LIT.bg
+          : 'radial-gradient(ellipse 60% 55% at 50% 60%, rgb(31 78 122 / 90%), transparent)',
       }}
     >
       <OrthographicCamera
         makeDefault
-        position={[size * 1.6, size * 1.3, size * 1.6]}
+        // 실사풍은 정확한 아이소메트릭 (1,1,1) 방향에서 시작한다
+        position={lit ? [size * 1.5, size * 1.5, size * 1.5] : [size * 1.6, size * 1.3, size * 1.6]}
         // 깊이 버퍼 정밀도: 멀리(far)를 설비 크기에 맞춰 짧게 잡아야 16비트 깊이에서도 바닥과 블록이 안 싸운다
         near={0.1}
         far={size * 8}
@@ -127,14 +143,28 @@ export function Viewport({
         autoRotate={autoRotate}
         autoRotateSpeed={0.6}
         maxPolarAngle={Math.PI * 0.44}
-        target={[0, bbox[2] * MM * 0.3, 0]}
+        // 실사풍은 설비 높이의 절반쯤을 화면 가운데에 두어 위(꼭대기)와 아래(바닥 빛 무리)가 모두 들어오게
+        target={[0, lit ? bbox[2] * MM * 0.55 : bbox[2] * MM * 0.3, 0]}
       />
-      <CameraRig size={size} fit={lines ? 0.7 : 1} />
-      {!lines && <DragGate />}
-      <ambientLight intensity={0.6} />
-      <directionalLight position={[-6, 10, 4]} intensity={0.9} />
-      <directionalLight position={[8, 4, -8]} intensity={0.35} color="#9fc3e8" />
-      {lines ? (
+      <CameraRig size={size} fit={lines ? 0.7 : lit ? 0.72 : 1} />
+      {look === 'solid' && <DragGate />}
+      {lit ? (
+        <>
+          <LitRenderer />
+          <LitLights size={size} />
+          <LitFloor size={size} />
+          <LitMirror size={size} />
+          <LitRing radius={size * 0.38} />
+          <LitBloom />
+        </>
+      ) : (
+        <>
+          <ambientLight intensity={0.6} />
+          <directionalLight position={[-6, 10, 4]} intensity={0.9} />
+          <directionalLight position={[8, 4, -8]} intensity={0.35} color="#9fc3e8" />
+        </>
+      )}
+      {lit ? null : lines ? (
         <FadeGrid size={size} />
       ) : (
         <gridHelper args={[size * 2, Math.round(size * 2), LINE, LINE]} position={[0, -0.02, 0]}>
@@ -144,7 +174,7 @@ export function Viewport({
       {/* 문서 좌표 (mm, Z-up) → three (m, Y-up) */}
       <LookCtx.Provider value={look}>
         <group rotation={[-Math.PI / 2, 0, 0]} scale={MM} ref={(g) => void (rootGroup = g)}>
-          {!lines && <GuideBox bbox={bbox} />}
+          {look === 'solid' && <GuideBox bbox={bbox} />}
           <NodeTree doc={doc} parent={null} />
           <Runner />
         </group>
@@ -324,6 +354,8 @@ function NodeView({ doc, node }: { doc: Machine; node: MachineNode }) {
       if (drag?.id === node.id) endDrag(e);
     },
   };
+  const look = useContext(LookCtx);
+  const lit = look === 'lit';
   const r = node.transform.rotation;
   const height = useMemo(() => extents(prims)[2], [prims]);
   const prefix = prefixOf(doc, node.id);
@@ -342,7 +374,7 @@ function NodeView({ doc, node }: { doc: Machine; node: MachineNode }) {
           joint={part ? jointNames.find((j) => j.name === part)?.joint : undefined}
         >
           {list.map((p, i) => (
-            <Prim key={i} p={p} selected={selected} h={handlers} />
+            <Prim key={i} p={p} selected={selected} h={handlers} glow={glowOf(node, prefix, p, i)} />
           ))}
         </PartGroup>
       ))}
@@ -356,13 +388,22 @@ function NodeView({ doc, node }: { doc: Machine; node: MachineNode }) {
           <span
             className={`whitespace-nowrap text-[11px] px-1.5 py-0.5 rounded-sm border ${
               selected ? 'border-fg text-fg' : 'border-border text-muted'
-            } bg-[rgb(15_42_69/85%)]`}
+            } ${lit ? 'bg-[rgb(16_20_24/85%)]' : 'bg-[rgb(15_42_69/85%)]'}`}
           >
             <span className="mono font-semibold text-fg">{prefix}</span> {node.name}
           </span>
         </Html>
       )}
       <WorkLayer parent={node.id} />
+      {look !== 'lines' && CONVEYORS.has(node.blockType ?? '') && (
+        <FlowChips
+          length={Number(node.params['length'] ?? 2000)}
+          width={Number(node.params['width'] ?? 600)}
+          height={Number(node.params['height'] ?? 750)}
+          runTag={`${prefix}_RUN`}
+          dirTag={`${prefix}_DIR`}
+        />
+      )}
       <NodeTree doc={doc} parent={node.id} />
     </group>
   );
@@ -399,32 +440,74 @@ interface PrimHandlers {
 }
 
 /** 도형 하나. 원기둥은 문서 규약대로 축이 Z 라야 하므로(three 는 Y 축) 안쪽에서 X 축 +90° 돌려 세운다 */
-function Prim({ p, selected, h }: { p: Primitive; selected: boolean; h: PrimHandlers }) {
-  const lines = useContext(LookCtx) === 'lines';
+/** 실사풍에서 빛나는 도형: 타워램프 단(아래부터 R·Y·G), 센서 몸통 — 켜진 태그를 따라 발광 */
+const CONVEYORS = new Set(['roller-conveyor', 'belt-conveyor']);
+function glowOf(node: MachineNode, prefix: string, p: Primitive, i: number): { tag: string; color: string } | null {
+  if (!prefix || p.tone !== 2) return null;
+  if (node.blockType === 'tower-lamp') {
+    const tier = i - 1; // 0 = 기둥
+    const c: [string, string][] = [
+      ['R', '#ff6b6b'],
+      ['Y', '#f5b942'],
+      ['G', '#5ad28a'],
+    ];
+    const t = c[tier];
+    return t ? { tag: `${prefix}_${t[0]}`, color: t[1] } : null;
+  }
+  if (node.blockType === 'photo-sensor' || node.blockType === 'through-beam')
+    return { tag: `${prefix}_ON`, color: LIT.glow };
+  return null;
+}
+
+function Prim({
+  p,
+  selected,
+  h,
+  glow,
+}: {
+  p: Primitive;
+  selected: boolean;
+  h: PrimHandlers;
+  glow?: { tag: string; color: string } | null;
+}) {
+  const look = useContext(LookCtx);
+  const lines = look === 'lines';
+  const lit = look === 'lit';
   const rot = p.rotation ? [deg(p.rotation[0]), deg(p.rotation[1]), deg(p.rotation[2])] : [0, 0, 0];
   const mesh = (
-    <mesh rotation={p.kind === 'cylinder' ? [Math.PI / 2, 0, 0] : [0, 0, 0]} {...h}>
+    <mesh
+      rotation={p.kind === 'cylinder' ? [Math.PI / 2, 0, 0] : [0, 0, 0]}
+      castShadow={lit}
+      receiveShadow={lit}
+      {...h}
+    >
       {p.kind === 'box' ? (
         <boxGeometry args={p.size} />
       ) : (
-        <cylinderGeometry args={[p.size[0], p.size[1], p.size[2], 20]} />
+        <cylinderGeometry args={[p.size[0], p.size[1], p.size[2], lit ? 24 : 20]} />
       )}
-      {lines ? (
+      {!lines && glow ? (
+        <GlowMaterial tag={glow.tag} color={glow.color} />
+      ) : lit ? (
+        <meshStandardMaterial color={LIT.tones[p.tone] ?? LIT.tones[0]} metalness={0.45} roughness={0.5} />
+      ) : lines ? (
         // 깊이만 기록하는 가림막: 뒤쪽 선을 숨긴다 (은선 제거). 면 자체는 밀지 않는다(바닥 격자와 깊이가 겹쳐 깜빡이므로)
         <meshBasicMaterial colorWrite={false} />
       ) : (
         <meshLambertMaterial color={TONES[p.tone]} transparent opacity={0.92} />
       )}
       {/* 외곽선은 면보다 살짝 앞으로 당겨 그린다(면과 깊이 싸움 방지). 선은 삼각형 띠(Line2)라 polygonOffset 이 먹는다 */}
-      <Edges
-        color={selected ? SEL : LINE}
-        threshold={p.kind === 'cylinder' ? 30 : 15}
-        transparent
-        opacity={lines ? ([0.45, 0.7, 1][p.tone] ?? 1) : 1}
-        polygonOffset
-        polygonOffsetFactor={-1}
-        polygonOffsetUnits={-2}
-      />
+      {(!lit || selected) && (
+        <Edges
+          color={selected ? SEL : LINE}
+          threshold={p.kind === 'cylinder' ? 30 : 15}
+          transparent
+          opacity={lines ? ([0.45, 0.7, 1][p.tone] ?? 1) : 1}
+          polygonOffset
+          polygonOffsetFactor={-1}
+          polygonOffsetUnits={-2}
+        />
+      )}
     </mesh>
   );
   return (
@@ -437,6 +520,7 @@ function Prim({ p, selected, h }: { p: Primitive; selected: boolean; h: PrimHand
 /** 런타임이 만든 워크 (소스가 생성한 것 포함) — 메시 풀 32개를 매 프레임 갱신 */
 const POOL = 32;
 function WorkLayer({ parent }: { parent: string }) {
+  const lit = useContext(LookCtx) === 'lit';
   const refs = useRef<(THREE.Mesh | null)[]>([]);
   useFrame(() => {
     const rt = useEditor.getState().runtime();
@@ -452,10 +536,15 @@ function WorkLayer({ parent }: { parent: string }) {
   return (
     <>
       {Array.from({ length: POOL }, (_, i) => (
-        <mesh key={i} ref={(el) => void (refs.current[i] = el)} visible={false}>
+        <mesh key={i} ref={(el) => void (refs.current[i] = el)} visible={false} castShadow={lit}>
           <boxGeometry args={[100, 100, 50]} />
-          <meshLambertMaterial color={TONES[2]} />
-          <Edges color={LINE} />
+          {lit ? (
+            // 워크는 강조색으로 살짝 발광 → 블룸이 여기만 걸린다
+            <meshStandardMaterial color={LIT.glow} emissive={LIT.glow} emissiveIntensity={2.5} />
+          ) : (
+            <meshLambertMaterial color={TONES[2]} />
+          )}
+          {!lit && <Edges color={LINE} />}
         </mesh>
       ))}
     </>

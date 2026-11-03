@@ -91,6 +91,14 @@ export class MachineEditor {
       case 'stop':
         this.runtime = null;
         return { ok: true, changed: [], created: [] };
+      case 'auto':
+        if (!this.runtime) return { ok: false, error: '실행 모드가 아님 (run_demo 먼저)' };
+        this.runtime.setAuto(cmd.on);
+        return { ok: true, changed: [], created: [] };
+      case 'reset_works':
+        if (!this.runtime) return { ok: false, error: '실행 모드가 아님 (run_demo 먼저)' };
+        this.runtime.resetWorks();
+        return { ok: true, changed: [], created: [] };
       case 'force_tag': {
         if (!this.runtime) return { ok: false, error: '실행 모드가 아님 (run_demo 먼저)' };
         if (!this.runtime.signals.has(cmd.tag))

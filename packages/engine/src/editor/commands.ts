@@ -14,6 +14,7 @@ import {
 } from '@bse/schema';
 import type { BlockLibrary } from '@bse/blocks';
 import type { IdFactory } from './uuid.js';
+import { generateSequence } from './sequence.js';
 
 export interface EditorContext {
   lib: BlockLibrary;
@@ -510,6 +511,11 @@ export function applyCommand(doc: Machine, cmd: EditCommand, ctx: EditorContext)
     case 'set_sequence': {
       const next = clone(doc);
       next.sequence.steps = cmd.steps;
+      return ok(next, []);
+    }
+    case 'generate_sequence': {
+      const next = clone(doc);
+      next.sequence.steps = generateSequence(next);
       return ok(next, []);
     }
     case 'set_fidelity': {

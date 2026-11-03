@@ -103,10 +103,12 @@ export const Trajectory = z.object({
 /** 간이 시퀀스 (V1): 스텝 = 출력 세트 + 전이 조건. 정식 모델(IEC 61131-3 SFC)은 R2 검토 항목 */
 export const SequenceStep = z.object({
   id: z.string().min(1),
+  name: z.string().default('').describe('사람이 읽는 단계 이름 (예: 워크 도착 대기)'),
   set: z.array(z.object({ tag: TagName, value: z.union([z.boolean(), z.number()]) })).default([]),
   wait: z.array(z.object({ tag: TagName, value: z.union([z.boolean(), z.number()]) })).default([]),
   timeout_ms: z.number().int().positive().optional(),
 });
+export type SequenceStep = z.infer<typeof SequenceStep>;
 
 export const ProcessModel = z
   .object({

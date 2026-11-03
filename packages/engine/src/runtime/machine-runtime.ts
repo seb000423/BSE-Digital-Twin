@@ -63,6 +63,8 @@ export class MachineRuntime {
   readonly works: WorkState[] = [];
   /** 시뮬 시각 (s) */
   time = 0;
+  /** 자동 운전 (문서의 sequence 를 돌린다): 켜짐 여부 · 현재 스텝 번호 · 스텝에 들어온 시각 */
+  readonly auto = { on: false, step: 0, since: 0, entered: false };
   private readonly rng: Rng;
   private readonly processes: ProcessState[] = [];
   private readonly sources: {
@@ -212,8 +214,53 @@ export class MachineRuntime {
     this.step(Math.round((seconds * 1000) / SIGNAL_TICK_MS));
   }
 
+  /** 자동 운전 켜기/끄기. 켜면 첫 스텝부터 */
+  setAuto(on: boolean): void {
+    this.auto.on = on && this.doc.sequence.steps.length > 0;
+    this.auto.step = 0;
+    this.auto.since = this.time;
+    this.auto.entered = false;
+  }
+
+  /** 시뮬이 만든 워크를 모두 치우고 소스·싱크 카운트를 0 으로 (배치해 둔 워크 블록은 남김) */
+  resetWorks(): void {
+    for (let i = this.works.length - 1; i >= 0; i--)
+      if (this.works[i]!.id.startsWith('work-')) this.works.splice(i, 1);
+    for (const s of this.sources) {
+      s.made = 0;
+      s.nextAt = this.time;
+      this.set(`${s.prefix}_COUNT`, 0);
+      if (this.signals.has(`${s.prefix}_READY`)) this.signals.set(`${s.prefix}_READY`, true);
+    }
+    for (const s of this.sinks) {
+      s.count = 0;
+      this.set(`${s.prefix}_COUNT`, 0);
+    }
+  }
+
+  /** 자동 운전 한 틱: 스텝에 들어오면 set 을 쓰고, wait 가 모두 맞거나 timeout 이 지나면 다음 스텝. 끝나면 2번째 스텝으로 */
+  private tickAuto(): void {
+    const steps = this.doc.sequence.steps;
+    if (!this.auto.on || steps.length === 0) return;
+    const a = this.auto;
+    if (a.step >= steps.length) a.step = steps.length > 1 ? 1 : 0;
+    const st = steps[a.step]!;
+    if (!a.entered) {
+      for (const x of st.set) this.set(x.tag, x.value);
+      a.since = this.time;
+      a.entered = true;
+    }
+    const met = st.wait.every((w) => this.get(w.tag) === w.value);
+    const timedOut = st.timeout_ms !== undefined && (this.time - a.since) * 1000 >= st.timeout_ms - 1e-6;
+    if ((st.wait.length > 0 && met) || timedOut || (st.wait.length === 0 && st.timeout_ms === undefined)) {
+      a.step = a.step + 1 >= steps.length ? (steps.length > 1 ? 1 : 0) : a.step + 1;
+      a.entered = false;
+    }
+  }
+
   private tick(dt: number): void {
     this.time += dt;
+    this.tickAuto();
     for (const js of this.joints) this.tickJoint(js, dt);
     this.tickWorks(dt);
     for (const s of this.sensors) this.tickSensor(s);

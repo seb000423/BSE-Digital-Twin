@@ -1,7 +1,9 @@
 /** 아래: 신호 표(실행 중 실시간 값) · 수동 조작 패널(force_tag) · 명령 기록 */
 import { useRef, useState } from 'react';
 import { useLiveTick } from '../screens/MachineBuilder.js';
+import { describeTag } from '@bse/blocks';
 import { prefixOf, useEditor } from '../store.js';
+import { SequencePanel } from './SequencePanel.js';
 
 export function BottomPanel() {
   const { doc, selection, dispatch, running, log } = useEditor();
@@ -9,6 +11,14 @@ export function BottomPanel() {
   const rt = useEditor.getState().runtime();
   const prefix = selection[0] ? prefixOf(doc, selection[0]) : '';
   const rows = prefix ? doc.io.filter((e) => e.tag.startsWith(prefix + '_')) : doc.io;
+  /** 태그 → 블록 이름 (접두어가 같은 블록) */
+  const blockOf = (tag: string): string => {
+    const n = doc.nodes.find((x) => {
+      const b = x.components['block'];
+      return b && typeof b === 'object' && 'prefix' in b && tag.startsWith(String((b as { prefix: string }).prefix) + '_');
+    });
+    return n?.name ?? '공통';
+  };
   const outs = rows.filter((e) => e.dir === 'out');
   const val = (tag: string): string => {
     if (!rt || !rt.signals.has(tag)) return '—';
@@ -70,20 +80,25 @@ export function BottomPanel() {
           <table className="tbl mono">
             <thead>
               <tr>
+                <th className="font-sans">블록</th>
                 <th>태그</th>
-                <th>방향</th>
-                <th>형식</th>
-                <th>연결</th>
+                <th className="font-sans">뜻</th>
+                <th className="font-sans">종류</th>
+                <th className="font-sans">연결</th>
                 <th>값</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((e) => (
                 <tr key={e.tag}>
+                  <td className="font-sans text-muted">{blockOf(e.tag)}</td>
                   <td>{e.tag}</td>
-                  <td className="text-muted">{e.dir.toUpperCase()}</td>
-                  <td className="text-muted">{e.type.toUpperCase()}</td>
-                  <td className={e.binding ? '' : 'text-warn'}>
+                  <td className="font-sans">{describeTag(e.tag) || <span className="text-dim">—</span>}</td>
+                  <td className="font-sans text-muted" title={e.dir === 'out' ? '우리가 켜고 끄는 신호 (PLC 출력)' : '설비가 알려 주는 값 (PLC 입력)'}>
+                    {e.dir === 'out' ? '명령' : '상태'}
+                    {e.type !== 'bool' && <span className="text-dim"> · 수치</span>}
+                  </td>
+                  <td className={`font-sans ${e.binding ? 'text-muted' : 'text-warn'}`}>
                     {e.binding ? e.binding.kind : '미연결'}
                   </td>
                   <td>
@@ -113,7 +128,9 @@ export function BottomPanel() {
         onPointerDown={(e) => (e.target as Element).setPointerCapture(e.pointerId)}
         onPointerMove={onSplit}
       />
-      <div className="min-w-0 flex flex-col overflow-hidden">
+      <div className="min-w-0 grid grid-rows-[minmax(0,3fr)_minmax(0,2fr)] overflow-hidden">
+        <SequencePanel />
+        <div className="flex flex-col min-h-0 border-t border-border">
         <h3 className="panel-h m-0">수동 조작 · 명령 기록</h3>
         <div className="px-3 py-2 flex flex-wrap gap-1.5 border-b border-border">
           {running ? (
@@ -142,6 +159,7 @@ export function BottomPanel() {
               {!l.result.ok && ` → ${l.result.error}`}
             </div>
           ))}
+        </div>
         </div>
       </div>
     </div>

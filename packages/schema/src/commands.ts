@@ -129,6 +129,15 @@ const add_work = z.object({
 const attach = z.object({ cmd: z.literal('attach'), tool: Uuid, work: Uuid });
 const detach = z.object({ cmd: z.literal('detach'), tool: Uuid });
 const set_sequence = z.object({ cmd: z.literal('set_sequence'), steps: z.array(SequenceStep) });
+const generate_sequence = z
+  .object({ cmd: z.literal('generate_sequence') })
+  .describe('블록·태그를 보고 간이 동작 순서를 자동으로 만든다 (문서의 sequence 를 덮어씀)');
+const auto = z
+  .object({ cmd: z.literal('auto'), on: z.boolean() })
+  .describe('실행 모드에서 동작 순서(sequence)를 자동으로 돌린다 / 멈춘다');
+const reset_works = z
+  .object({ cmd: z.literal('reset_works') })
+  .describe('실행 모드에서 시뮬이 만든 워크를 모두 치우고 소스·싱크 카운트를 0 으로');
 const force_tag = z
   .object({ cmd: z.literal('force_tag'), tag: TagName, value: z.union([z.boolean(), z.number()]) })
   .describe('수동 조작 패널');
@@ -280,6 +289,9 @@ export const EditCommand = z.discriminatedUnion('cmd', [
   attach,
   detach,
   set_sequence,
+  generate_sequence,
+  auto,
+  reset_works,
   force_tag,
   set_fidelity,
   make_card,
@@ -340,6 +352,9 @@ export const COMMAND_SCOPE: Record<EditCommandName, readonly Scope[] | 'both'> =
   attach: ['machine'],
   detach: ['machine'],
   set_sequence: ['machine'],
+  generate_sequence: ['machine'],
+  auto: ['machine'],
+  reset_works: ['machine'],
   force_tag: 'both',
   set_fidelity: ['machine'],
   make_card: ['machine'],

@@ -5,7 +5,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 const KEY = 'bse.dock.height';
-const DEFAULT = 220;
+const DEFAULT = 300;
 const MIN = 120;
 const HEAD = 40;
 

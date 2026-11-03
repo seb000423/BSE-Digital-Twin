@@ -87,5 +87,5 @@ V2: G. Monitor(Evolve) 대시보드 · 공유 뷰어 · 변환(AAS/USD)
 - 색·글꼴·로딩 문구는 [04 디자인 가이드](04_DESIGN_GUIDE.md) (남색 단일 테마, 로딩 문구 어휘 6개)
 - 한국어 기본, 영어 UI는 V2. 1920×1080 기준, WebGL2 필수
 - 기존 `BSE_STUDIO/apps/web`(VEXPLOR 파생 AAS 도구)의 화면과 코드는 쓰지 않음. 빌더는 `BSE-Digital-Twin` 저장소의 `apps/`에 처음부터, AAS 변환은 IDTA 공식 라이브러리 + 우리 매핑, 현장 연결은 게이트웨이 방식 (D-31)
-- 구현 위치: `apps/web/src` — `screens/`(홈 B `Home`, 설비 편집기 C `MachineBuilder`, 공장 자리 `FactoryBuilder`(3단계), 실행 보기 `Simulate`, V2 자리 `Evolve`), `panels/`(팔레트·속성·아래 패널·`Thumb` 위에서 본 그림), `three/Viewport.tsx`(3D, 보기 solid/lines). 주소 해시 `#home #machine #factory #simulate #evolve`. 화면은 명령만 호출한다(`store.ts`의 `dispatch`, `open`). 2026-11-02 C 화면 편집·실행 모드, Simulate 보기 구현(D-37), 비교 모드는 4단계
-- 머리 메뉴 = 집 아이콘(홈) · Build(설비·공장) · Simulate · Evolve. 템플릿 3종은 `packages/engine` 의 `MACHINE_TEMPLATES`(기준 설비 3종, 게이트 1 테스트와 같은 함수)
+- 구현 위치: `apps/web/src` — `screens/`(홈 B `Home`, 설비 편집기 C `MachineBuilder`, 공장 자리 `FactoryBuilder`(3단계), 실행 보기 `Simulate`, V2 자리 `Evolve`), `panels/`(팔레트·속성·아래 패널(신호 표·`SequencePanel` 동작 순서·수동 조작)·`Thumb` 위에서 본 그림), `three/Viewport.tsx`(3D, 보기 solid/lines/lit) + `three/lit.tsx`(실사풍 장면 부품, D-39). 주소 해시 `#home #machine #factory #simulate #evolve`. 화면은 명령만 호출한다(`store.ts`의 `dispatch`, `open`). 2026-11-02 C 화면 편집·실행 모드, Simulate 보기 구현(D-37), 비교 모드는 4단계
+- 머리 메뉴 = Studio(홈) · Build(설비·공장) · Simulate · Evolve. 템플릿 3종은 `packages/engine` 의 `MACHINE_TEMPLATES`(기준 설비 3종, 게이트 1 테스트와 같은 함수)

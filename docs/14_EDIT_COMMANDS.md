@@ -56,7 +56,10 @@
 | `add_work` | 설비 | `kind`: work \| source \| sink \| carrier<br>`transform`: {…} (기본값 있음)<br>`params`: record (기본값 있음) |
 | `attach` | 설비 | `tool`: string<br>`work`: string |
 | `detach` | 설비 | `tool`: string |
-| `set_sequence` | 설비 | `steps`: {…}[] |
+| `set_sequence` | 설비 | `steps`: {…}[] (스텝 = `id`, `name`, `set`[], `wait`[], `timeout_ms`?) |
+| `generate_sequence` | 설비 | —<br>_블록·태그를 보고 간이 동작 순서를 만들어 sequence 를 덮어씀 (실행 취소 가능). 2026-11-03_ |
+| `auto` | 설비 | `on`: boolean<br>_실행 모드에서 동작 순서를 자동으로 돌림/멈춤. 마지막 스텝 뒤엔 2번째 스텝으로 반복_ |
+| `reset_works` | 설비 | —<br>_실행 모드에서 시뮬이 만든 워크를 치우고 소스·싱크 카운트 0_ |
 | `force_tag` | 설비·공장 | `tag`: string<br>`value`: boolean \| number<br>_수동 조작 패널_ |
 | `set_fidelity` | 설비 | `fidelity`: L1 \| L2 \| L3 |
 | `make_card` | 설비 | —<br>_설비 카드(L1) 생성 → 팩토리 라이브러리 등록_ |

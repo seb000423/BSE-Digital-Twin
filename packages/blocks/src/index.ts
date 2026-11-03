@@ -18,3 +18,4 @@ export {
   type CylinderPrim,
   type Tone,
 } from './geometry.js';
+export { describeTag } from './tag-desc.js';
