@@ -117,8 +117,9 @@ export function Viewport({
       <OrthographicCamera
         makeDefault
         position={[size * 1.6, size * 1.3, size * 1.6]}
-        near={0.01}
-        far={200}
+        // 깊이 버퍼 정밀도: 멀리(far)를 설비 크기에 맞춰 짧게 잡아야 16비트 깊이에서도 바닥과 블록이 안 싸운다
+        near={0.1}
+        far={size * 8}
       />
       <OrbitControls
         makeDefault
@@ -136,7 +137,7 @@ export function Viewport({
       {lines ? (
         <FadeGrid size={size} />
       ) : (
-        <gridHelper args={[size * 2, Math.round(size * 2), LINE, LINE]} position={[0, -0.008, 0]}>
+        <gridHelper args={[size * 2, Math.round(size * 2), LINE, LINE]} position={[0, -0.02, 0]}>
           <lineBasicMaterial attach="material" color={LINE} transparent opacity={0.22} />
         </gridHelper>
       )}
@@ -217,7 +218,7 @@ function FadeGrid({ size }: { size: number }) {
     return g;
   }, [size]);
   return (
-    <lineSegments geometry={geo} position={[0, -0.008, 0]}>
+    <lineSegments geometry={geo} position={[0, -0.02, 0]}>
       <lineBasicMaterial
         vertexColors
         transparent

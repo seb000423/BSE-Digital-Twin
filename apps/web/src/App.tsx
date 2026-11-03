@@ -50,17 +50,16 @@ export function App() {
             </a>
           ))}
         </nav>
-        <a href="#home" className="flex items-center gap-2 text-fg no-underline">
+        <a
+          href="/"
+          className="flex items-center gap-2 text-fg no-underline"
+          title="소개 페이지(랜딩)로 나가기"
+        >
           <Logo />
           <span className="font-bold text-sm">BSE : Digital Twin</span>
           <span className="text-xs text-muted">beta</span>
         </a>
-        <div className="justify-self-end flex items-center gap-3 text-xs text-muted">
-          <span>(주)샘플정밀 · 부승언</span>
-          <button type="button" className="btn">
-            설정
-          </button>
-        </div>
+        <div className="justify-self-end" aria-hidden="true" />
       </header>
       {view === 'home' && <Home />}
       {view === 'machine' && <MachineBuilder />}

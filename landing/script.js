@@ -46,7 +46,7 @@ document.querySelectorAll('.lang-toggle button').forEach((button) => {
   });
 });
 
-// Build opens BSE Studio (/studio/). Monitor is not online yet — say so in place
+// Build opens BSE Studio (/studio/), Monitor opens its Evolve page. Any remaining notice button says so in place
 document.querySelectorAll('.row-buttons button.button').forEach((button) => {
   button.addEventListener('click', () => {
     shown = button;
