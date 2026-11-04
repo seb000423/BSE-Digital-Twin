@@ -1,6 +1,6 @@
 /**
  * 실사풍 보기('lit', 04 §9.5, D-39) 의 장면 부품들: Simulate 화면에서 쓴다.
- * 그래파이트(중립 회색) 설비 + 파란 강조 1색. 직교 아이소메트릭, 따뜻한 키라이트 + 그림자,
+ * 차콜 바닥 + 베이지 설비 + 앰버 강조 1색 (D-41). 직교 아이소메트릭, 따뜻한 키라이트 + 그림자,
  * 바닥은 원형으로 배경에 녹이고 격자는 셰이더로 그린다(깊이 싸움 없음), 블룸은 발광체에만.
  * 코드·모델·배색은 우리 것이고 설정값만 참고 분석(docs research)에서 가져왔다.
  */
@@ -15,15 +15,15 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 
-/** 그래파이트 + 블루 (오너 선택 2026-11-03) */
+/** 차콜 + 베이지 + 앰버 (D-41, 2026-11-04): 어두운 차콜 바닥, 설비는 따뜻한 회색·베이지 3단, 발광은 앰버 한 색 */
 export const LIT = {
-  bg: '#101418',
-  floor: '#171c22',
-  grid: '#9fb4c8',
-  tones: ['#262b31', '#6b7279', '#b7bcc2'] as const,
-  key: '#f2f0ec',
-  rim: '#b3b9c0',
-  glow: '#7fc4ff',
+  bg: '#1a1917',
+  floor: '#221f1b',
+  grid: '#cfc5b0',
+  tones: ['#35332e', '#8e877a', '#d6ccb9'] as const,
+  key: '#fff1dc',
+  rim: '#cabfa6',
+  glow: '#ffb14a',
 };
 
 /** 렌더러 설정 + 환경광 (한 번) */

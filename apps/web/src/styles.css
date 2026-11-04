@@ -1,16 +1,18 @@
-/* BSE Studio 화면 토큰 — 디자인 가이드 04 §4·§9: 랜딩과 같은 남색 청사진 한 가지 테마 + 상태 색 3가지 */
+/* BSE Studio 화면 토큰 — 디자인 가이드 04 §4·§9 (D-41): 스튜디오는 차콜 바탕 + 베이지 선·글자 + 앰버 강조 한 가지 테마.
+   랜딩(남색 청사진)과 다르게 간다. 값은 전부 우리 것. 상태 색 3가지는 공통 */
 @import 'tailwindcss';
 
 @theme {
-  --color-bg: #0f2a45;
-  --color-paper: #16395c;
-  --color-glow: #1f4e7a;
-  --color-line: #cfe4f5;
-  --color-fg: #eef5fb;
-  --color-muted: #a3b9cd;
-  --color-dim: #6f8aa3;
-  --color-fill: #dcebf7;
-  --color-border: rgb(200 225 245 / 22%);
+  --color-bg: #1c1b19;
+  --color-paper: #262520;
+  --color-glow: #35332c;
+  --color-line: #d8cfbd;
+  --color-fg: #f2ede3;
+  --color-muted: #b3ab98;
+  --color-dim: #7e7769;
+  --color-fill: #e6dec9;
+  --color-accent: #f2a93b;
+  --color-border: rgb(216 207 189 / 22%);
   --color-ok: #5ad28a;
   --color-warn: #f5b942;
   --color-alarm: #ff6b6b;
@@ -54,11 +56,20 @@ button {
   border-color: var(--color-fill);
   color: var(--color-bg);
 }
-.btn[aria-pressed='true'],
-.btn-primary {
+.btn[aria-pressed='true'] {
   background: var(--color-fill);
   border-color: var(--color-fill);
   color: var(--color-bg);
+}
+.btn-primary {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #1c1b19;
+}
+.btn-primary:hover {
+  background: #ffbd57;
+  border-color: #ffbd57;
+  color: #1c1b19;
 }
 .btn:disabled {
   opacity: 0.4;
@@ -76,11 +87,26 @@ button {
 .seg > [aria-pressed='true'],
 .seg > [data-state='on'],
 .seg > [data-state='active'] {
-  background: var(--color-fill);
-  color: var(--color-bg);
+  background: var(--color-accent);
+  color: #1c1b19;
 }
+/* 패널 머리글: 패널마다 또렷이 구분되도록 바탕을 한 단 올리고 왼쪽에 앰버 표식 */
 .panel-h {
-  @apply flex items-center gap-2 min-h-10 px-3 text-xs font-semibold text-muted border-b border-border;
+  @apply flex items-center gap-2 min-h-10 px-3 text-xs font-bold text-fg border-b border-border;
+  background: var(--color-paper);
+  letter-spacing: 0.01em;
+}
+.panel-h::before {
+  content: '';
+  width: 3px;
+  height: 12px;
+  flex: none;
+  border-radius: 1px;
+  background: var(--color-accent);
+}
+/* 옆·아래 패널의 바탕 (가운데 3D 보다 한 단 밝게) */
+.pane {
+  background: color-mix(in srgb, var(--color-paper) 70%, var(--color-bg));
 }
 .kv {
   @apply grid gap-x-3 gap-y-1 text-xs;
@@ -109,7 +135,7 @@ button {
   font-size: 11px;
 }
 .tree-row[aria-current='true'] {
-  background: rgb(220 235 247 / 14%);
+  background: rgb(216 207 189 / 14%);
 }
 .tbl {
   @apply w-full border-collapse text-xs;
@@ -119,7 +145,7 @@ button {
 }
 .tbl td {
   @apply px-3 h-8 whitespace-nowrap;
-  border-bottom: 1px solid rgb(200 225 245 / 12%);
+  border-bottom: 1px solid rgb(216 207 189 / 12%);
 }
 
 /* 가로 배속 바 (소리 크기 바처럼) */
@@ -132,11 +158,11 @@ input.speed {
 }
 input.speed::-webkit-slider-runnable-track {
   height: 3px;
-  background: rgb(207 228 245 / 35%);
+  background: rgb(216 207 189 / 35%);
 }
 input.speed::-moz-range-track {
   height: 3px;
-  background: rgb(207 228 245 / 35%);
+  background: rgb(216 207 189 / 35%);
 }
 input.speed::-webkit-slider-thumb {
   -webkit-appearance: none;

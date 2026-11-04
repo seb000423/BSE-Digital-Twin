@@ -80,7 +80,7 @@ export function SequencePanel() {
           <li
             key={s.id}
             aria-current={i === cur ? 'step' : undefined}
-            className="px-3 py-1.5 border-b border-border grid grid-cols-[1.5rem_1fr] gap-x-2 aria-[current=step]:bg-[rgb(220_235_247/10%)]"
+            className="px-3 py-1.5 border-b border-border grid grid-cols-[1.5rem_1fr] gap-x-2 aria-[current=step]:bg-[rgb(216_207_189/10%)]"
           >
             <span className={`mono ${i === cur ? 'text-fg font-bold' : 'text-dim'}`}>{i + 1}</span>
             <div className="min-w-0">

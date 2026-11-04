@@ -138,7 +138,7 @@ export function BottomPanel() {
         aria-orientation="vertical"
         aria-label="신호 표 너비"
         title="끌어서 너비 조절"
-        className="cursor-col-resize bg-[rgb(200_225_245/10%)] hover:bg-[rgb(200_225_245/35%)]"
+        className="cursor-col-resize bg-[rgb(216_207_189/10%)] hover:bg-[rgb(216_207_189/35%)]"
         onPointerDown={(e) => (e.target as Element).setPointerCapture(e.pointerId)}
         onPointerMove={onSplit}
       />

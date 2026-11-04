@@ -5,7 +5,7 @@
 | 주 역할 | 빌더의 모든 편집·실행 명령 한 벌 (지침서 원칙 4, 10.2절) |
 | 부 역할 | UI 버튼·AI·MCP 가 부르는 공통 입구. OpenAPI·MCP 도구 설명의 원본 |
 | 주 담당 / 부 담당 | 스마트제조 수석연구원 / 로보틱스 시뮬레이션 엔지니어, 리드 프로덕트 디자이너 |
-| 마지막 수정 | 2026-11-02 |
+| 마지막 수정 | 2026-11-04 |
 
 > **원본은 코드**입니다: `packages/schema/src/commands.ts` (zod). 이 표는 거기서 생성한 것이라 손으로 고치지 않습니다. 명령을 더하거나 바꾸려면 코드 → 이 문서 순서로 갱신합니다 (CLAUDE.md 6장 "명령 추가 순서").
 
@@ -17,7 +17,7 @@
 - 인자의 길이는 mm, 각도는 deg (지침서 5장). id 는 UUID v7
 - 구현 위치: `packages/engine/src/editor` — `applyCommand(문서, 명령)` 은 새 문서를 돌려주고(순수 함수), `MachineEditor.dispatch(명령)` 이 실행 취소·선택·실행 모드(force_tag)를 맡는다. 설비 범위 명령은 2단계 1차 묶음에서 구현(set_reference·load_glb·load_urdf·import_io 는 에셋 저장소가 생기는 묶음에서)
 
-## 2. 명령 (54개)
+## 2. 명령 (58개)
 
 ### 공통 (편집기 코어) — 17개
 | 명령 | 범위 | 인자 |
@@ -40,7 +40,7 @@
 | `save` | 설비·공장 | `message`: string (기본값 있음) |
 | `export` | 설비·공장 | `format`: json \| glb \| dxf \| xlsx_io \| pdf \| card |
 
-### 머신빌더 (Build, 지침서 6장) — 17개
+### 머신빌더 (Build, 지침서 6장) — 20개
 | 명령 | 범위 | 인자 |
 |------|------|------|
 | `set_bbox` | 설비 | `bbox`: [number, number, number] |
@@ -56,21 +56,22 @@
 | `add_work` | 설비 | `kind`: work \| source \| sink \| carrier<br>`transform`: {…} (기본값 있음)<br>`params`: record (기본값 있음) |
 | `attach` | 설비 | `tool`: string<br>`work`: string |
 | `detach` | 설비 | `tool`: string |
-| `set_sequence` | 설비 | `steps`: {…}[] (스텝 = `id`, `name`, `set`[], `wait`[], `timeout_ms`?) |
-| `generate_sequence` | 설비 | —<br>_블록·태그를 보고 간이 동작 순서를 만들어 sequence 를 덮어씀 (실행 취소 가능). 2026-11-03_ |
-| `auto` | 설비 | `on`: boolean<br>_실행 모드에서 동작 순서를 자동으로 돌림/멈춤. 마지막 스텝 뒤엔 2번째 스텝으로 반복_ |
-| `reset_works` | 설비 | —<br>_실행 모드에서 시뮬이 만든 워크를 치우고 소스·싱크 카운트 0_ |
+| `set_sequence` | 설비 | `steps`: {…}[] |
+| `generate_sequence` | 설비 | —<br>_블록·태그를 보고 간이 동작 순서를 자동으로 만든다 (문서의 sequence 를 덮어씀)_ |
+| `auto` | 설비 | `on`: boolean<br>_실행 모드에서 동작 순서(sequence)를 자동으로 돌린다 / 멈춘다_ |
+| `reset_works` | 설비 | —<br>_실행 모드에서 시뮬이 만든 워크를 모두 치우고 소스·싱크 카운트를 0 으로_ |
 | `force_tag` | 설비·공장 | `tag`: string<br>`value`: boolean \| number<br>_수동 조작 패널_ |
 | `set_fidelity` | 설비 | `fidelity`: L1 \| L2 \| L3 |
 | `make_card` | 설비 | —<br>_설비 카드(L1) 생성 → 팩토리 라이브러리 등록_ |
 
-### 팩토리빌더 (Build, 지침서 7장) — 13개
+### 팩토리빌더 (Build, 지침서 7장) — 14개
 | 명령 | 범위 | 인자 |
 |------|------|------|
 | `add_level` | 공장 | `name`: string<br>`elevation`: number (기본값 있음) |
 | `draw_slab` | 공장 | `level`: string<br>`polygon`: [number, number][] |
 | `draw_wall` | 공장 | `level`: string<br>`polyline`: [number, number][]<br>`height`: number<br>`thickness`: number (기본값 있음) |
 | `place_columns` | 공장 | `level`: string<br>`origin`: [number, number]<br>`pitch`: [number, number]<br>`count`: [integer, integer]<br>`height`: number |
+| `draw_roof` | 공장 | `polygon`: [number, number][]<br>`height`: number — 지붕 밑면 높이 (mm) |
 | `add_opening` | 공장 | `wall`: string<br>`kind`: door \| shutter \| dock \| emergency_exit \| window<br>`offset`: number<br>`width`: number<br>`height`: number |
 | `draw_marking` | 공장 | `kind`: aisle \| zone \| safety<br>`points`: [number, number][] |
 | `place_machine` | 공장 | `ref`: string<br>`transform`: {…} (기본값 있음)<br>`tagPrefix`: string? |

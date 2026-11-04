@@ -27,7 +27,7 @@ export function Evolve() {
       </div>
       <section className="grid gap-5 grid-cols-1 lg:grid-cols-3">
         {tiles.map((x) => (
-          <div key={x.t} className="panel border border-border rounded-sm bg-[rgb(22_57_92/45%)]">
+          <div key={x.t} className="panel border border-border rounded-sm bg-[rgb(38_37_32/70%)]">
             <h2 className="panel-h m-0 min-h-11 text-sm text-fg">
               {x.t}
               <span className="ml-auto text-[11px] font-bold px-1.5 border border-border rounded-sm text-muted">
@@ -38,7 +38,7 @@ export function Evolve() {
           </div>
         ))}
       </section>
-      <section className="panel border border-border rounded-sm bg-[rgb(22_57_92/45%)]">
+      <section className="panel border border-border rounded-sm bg-[rgb(38_37_32/70%)]">
         <h2 className="panel-h m-0 min-h-11 text-sm text-fg">지금 할 수 있는 것</h2>
         <div className="p-4 text-xs text-muted flex flex-col gap-1.5">
           <span>

@@ -45,7 +45,7 @@ export function Dock({ children }: { children: ReactNode }) {
 
   return (
     <div
-      className="shrink-0 border-t border-border overflow-hidden flex flex-col"
+      className="pane shrink-0 border-t border-border overflow-hidden flex flex-col"
       style={{ height: open ? height : HEAD }}
     >
       <div
@@ -53,7 +53,7 @@ export function Dock({ children }: { children: ReactNode }) {
         aria-orientation="horizontal"
         aria-label="아래 패널 높이"
         title="끌어서 높이 조절 · 두 번 누르면 기본 높이"
-        className="h-1.5 shrink-0 cursor-row-resize bg-[rgb(200_225_245/10%)] hover:bg-[rgb(200_225_245/35%)] relative"
+        className="h-1.5 shrink-0 cursor-row-resize bg-[rgb(216_207_189/10%)] hover:bg-[rgb(216_207_189/35%)] relative"
         onPointerDown={onDown}
         onPointerMove={onMove}
         onPointerUp={onUp}

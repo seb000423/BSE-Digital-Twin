@@ -6,6 +6,7 @@ import { useMemo, useRef } from 'react';
 import { MACHINE_TEMPLATES } from '@bse/engine';
 import { Thumb } from '../panels/Thumb.js';
 import { lib, templateDoc, useEditor, type OpenSource } from '../store.js';
+import { floorSize, useFactory } from '../store-factory.js';
 
 const GRADE: Record<string, string> = {
   'conveyor-station': 'L2',
@@ -18,6 +19,9 @@ export function Home() {
   const openJson = useEditor((s) => s.openJson);
   const file = useRef<HTMLInputElement>(null);
   const docs = useMemo(() => MACHINE_TEMPLATES.map((t) => ({ t, doc: templateDoc(t.id) })), []);
+  const factory = useFactory((s) => s.doc);
+  const factoryDirty = useFactory((s) => s.editor.canUndo);
+  const [fw, fd] = floorSize(factory);
 
   const go = (src: OpenSource) => {
     open(src);
@@ -41,7 +45,8 @@ export function Home() {
         <div>
           <h1 className="m-0 text-2xl font-bold leading-10">BSE Studio</h1>
           <p className="m-0 text-xs text-muted">
-            설비를 만들고(Build) → 돌려 보고(Simulate) → 현장과 맞춘다(Evolve)
+            설비를 만들고(Machine) → 공장에 놓고(Factory) → 돌려 보고(Simulate) → 현장과
+            맞춘다(Evolve)
           </p>
         </div>
         <div className="flex gap-2">
@@ -58,7 +63,7 @@ export function Home() {
         </div>
       </div>
 
-      <section className="panel border border-border rounded-sm bg-[rgb(22_57_92/45%)]">
+      <section className="panel border border-border rounded-sm bg-[rgb(38_37_32/70%)]">
         <h2 className="panel-h m-0 min-h-11 text-sm text-fg">
           설비 <span className="font-normal text-muted">{docs.length}</span>
           <span className="text-muted font-normal">
@@ -82,10 +87,10 @@ export function Home() {
                 key={t.id}
                 type="button"
                 onClick={() => go(t.id)}
-                className="grid gap-2 p-3 border border-border rounded-sm bg-[rgb(15_42_69/55%)] text-fg text-left cursor-pointer hover:border-line"
+                className="grid gap-2 p-3 border border-border rounded-sm bg-[rgb(28_27_25/55%)] text-fg text-left cursor-pointer hover:border-line"
                 title="Build 에서 연다"
               >
-                <div className="h-[130px] border border-[rgb(207_228_245/25%)] rounded-sm bg-bg bg-[linear-gradient(rgb(207_228_245/12%)_1px,transparent_1px),linear-gradient(90deg,rgb(207_228_245/12%)_1px,transparent_1px)] bg-[size:18px_18px] text-line p-2">
+                <div className="h-[130px] border border-[rgb(216_207_189/25%)] rounded-sm bg-bg bg-[linear-gradient(rgb(216_207_189/12%)_1px,transparent_1px),linear-gradient(90deg,rgb(216_207_189/12%)_1px,transparent_1px)] bg-[size:18px_18px] text-line p-2">
                   <Thumb doc={doc} className="w-full h-full" />
                 </div>
                 <div className="flex items-center justify-between font-bold text-sm">
@@ -112,12 +117,14 @@ export function Home() {
       </section>
 
       <section className="grid gap-5 grid-cols-1 lg:grid-cols-2">
-        <div className="panel border border-border rounded-sm bg-[rgb(22_57_92/45%)]">
+        <div className="panel border border-border rounded-sm bg-[rgb(38_37_32/70%)]">
           <h2 className="panel-h m-0 min-h-11 text-sm text-fg">
-            공장 <span className="font-normal text-muted">2</span>
-            <span className="text-muted font-normal">· 예시 · 3단계에서 만듭니다</span>
-            <a href="#factory" className="btn ml-auto min-h-8 no-underline">
-              + 새 공장
+            공장 <span className="font-normal text-muted">1</span>
+            <span className="text-muted font-normal">
+              · 건물 외형 + 설비 배치 · Factory 에서 편집
+            </span>
+            <a href="#factory" className="btn btn-primary ml-auto min-h-8 no-underline">
+              Factory 열기
             </a>
           </h2>
           <table className="tbl">
@@ -125,30 +132,28 @@ export function Home() {
               <tr>
                 <th>이름</th>
                 <th className="text-right">설비</th>
+                <th className="text-right">흐름</th>
                 <th className="text-right">바닥</th>
-                <th className="text-right">수정</th>
+                <th className="text-right">상태</th>
               </tr>
             </thead>
             <tbody>
-              {[
-                ['2공장 A라인', '12대', '48 × 30 m', '오늘 14:02'],
-                ['신규 라인 검토안', '7대', '30 × 24 m', '어제'],
-              ].map((r) => (
-                <tr
-                  key={r[0]}
-                  className="cursor-pointer hover:bg-[rgb(220_235_247/6%)]"
-                  onClick={() => (location.hash = '#factory')}
-                >
-                  <td className="font-semibold">{r[0]}</td>
-                  <td className="text-right">{r[1]}</td>
-                  <td className="text-right mono">{r[2]}</td>
-                  <td className="text-right text-muted">{r[3]}</td>
-                </tr>
-              ))}
+              <tr
+                className="cursor-pointer hover:bg-[rgb(216_207_189/6%)]"
+                onClick={() => (location.hash = '#factory')}
+              >
+                <td className="font-semibold">{factory.meta.name}</td>
+                <td className="text-right">{factory.machines.length}대</td>
+                <td className="text-right">{factory.flows.length}</td>
+                <td className="text-right mono">
+                  {Math.round(fw / 1000)} × {Math.round(fd / 1000)} m
+                </td>
+                <td className="text-right text-muted">{factoryDirty ? '수정됨' : '저장됨'}</td>
+              </tr>
             </tbody>
           </table>
         </div>
-        <div className="panel border border-border rounded-sm bg-[rgb(22_57_92/45%)]">
+        <div className="panel border border-border rounded-sm bg-[rgb(38_37_32/70%)]">
           <h2 className="panel-h m-0 min-h-11 text-sm text-fg">
             최근 실행 <span className="font-normal text-muted">2</span>
             <span className="text-muted font-normal">· 예시 · 정식 실행은 4단계</span>
@@ -166,7 +171,7 @@ export function Home() {
             </thead>
             <tbody>
               <tr
-                className="cursor-pointer hover:bg-[rgb(220_235_247/6%)]"
+                className="cursor-pointer hover:bg-[rgb(216_207_189/6%)]"
                 onClick={() => (location.hash = '#simulate')}
               >
                 <td>
@@ -179,7 +184,7 @@ export function Home() {
                 </td>
               </tr>
               <tr
-                className="cursor-pointer hover:bg-[rgb(220_235_247/6%)]"
+                className="cursor-pointer hover:bg-[rgb(216_207_189/6%)]"
                 onClick={() => (location.hash = '#simulate')}
               >
                 <td>

@@ -1,10 +1,10 @@
 /**
- * 3D 뷰포트 (04 §9.4): 남색 바닥 격자 + 옅게 채운 면 3단계 + 밝은 외곽선. 선택 = 흰 외곽선.
+ * 3D 뷰포트 (04 §9.4): 차콜 바닥 격자 + 옅게 채운 면 3단계 + 베이지 외곽선. 선택 = 흰 외곽선.
  * 좌표: 문서는 mm · Z-up, three.js 는 m · Y-up (지침서 5장) → 루트 그룹에서 한 번에 변환한다.
  * 움직임은 런타임(MachineRuntime)의 관절 위치를 매 프레임 읽어서만 반영한다 (스토어에 넣지 않음).
  * 끌어서 옮기기: 블록을 누른 채 끌면 그 높이의 수평면 위에서 움직이고(50 mm 격자), 놓을 때 move 명령 한 번만 보낸다.
  * 보기 세 가지 (04 §9.4·9.5): 'solid' = 편집용(옅게 채운 면 + 외곽선, 클릭·끌기),
- * 'lines' = 은선 선화(면은 깊이만 기록해 뒤의 선을 가리고, 외곽선만 보임),
+ * 'lines' = X-ray 선화(면을 비우고 외곽선만 남겨 속까지 보임, 04 §9.4),
  * 'lit' = Simulate 용 실사풍(그래파이트 설비 + 조명·그림자·블룸, D-39). 장면 부품은 lit.tsx.
  */
 import { createContext, useContext, useEffect, useMemo, useRef } from 'react';
@@ -27,14 +27,20 @@ import {
   LitRing,
 } from './lit.js';
 
-const MM = 0.001;
-const TONES = ['#16395c', '#1e4a73', '#2a5f8f'] as const;
-const LINE = '#cfe4f5';
+export const MM = 0.001;
+// 편집 보기 배색 (D-41): 차콜 면 3단 + 베이지 선. 실사풍 배색은 lit.tsx 의 LIT
+export const TONES = ['#2b2a26', '#3b3933', '#514d45'] as const;
+export const LINE = '#d8cfbd';
 const SEL = '#ffffff';
 const SNAP = 50;
 export type Look = 'solid' | 'lines' | 'lit';
-const LookCtx = createContext<Look>('solid');
-const deg = (d: number) => (d * Math.PI) / 180;
+export const LookCtx = createContext<Look>('solid');
+/**
+ * 팩토리 뷰포트가 설비 모형을 그릴 때 쓴다: 값이 있으면 블록 클릭이 (블록 선택·끌기 대신) 이 함수로 가고,
+ * 라벨·워크·흐름 빛처럼 머신빌더 런타임에 묶인 것은 그리지 않는다.
+ */
+export const PickCtx = createContext<((e: ThreeEvent<PointerEvent>) => void) | null>(null);
+export const deg = (d: number) => (d * Math.PI) / 180;
 
 /** 노드 id → three 그룹 (끌기 미리보기와 부모 좌표 변환에 쓴다) */
 const groups = new Map<string, THREE.Group>();
@@ -126,7 +132,7 @@ export function Viewport({
       style={{
         background: lit
           ? LIT.bg
-          : 'radial-gradient(ellipse 60% 55% at 50% 60%, rgb(31 78 122 / 90%), transparent)',
+          : 'radial-gradient(ellipse 60% 55% at 50% 60%, rgb(53 51 44 / 90%), transparent)',
       }}
     >
       <OrthographicCamera
@@ -161,7 +167,7 @@ export function Viewport({
         <>
           <ambientLight intensity={0.6} />
           <directionalLight position={[-6, 10, 4]} intensity={0.9} />
-          <directionalLight position={[8, 4, -8]} intensity={0.35} color="#9fc3e8" />
+          <directionalLight position={[8, 4, -8]} intensity={0.35} color="#e8d9bb" />
         </>
       )}
       {lit ? null : lines ? (
@@ -187,7 +193,7 @@ export function Viewport({
  * 블록 위에서 누르면 OrbitControls 가 먼저 돌기 시작하지 않도록, 캡처 단계에서 먼저 보고 잠시 끈다.
  * (r3f 와 OrbitControls 는 같은 요소에 버블 단계로 붙어 있어 순서를 믿을 수 없다. 놓으면 다시 켠다)
  */
-function DragGate() {
+export function DragGate() {
   const { events, camera, scene, raycaster, controls, gl } = useThree();
   useEffect(() => {
     const el = events.connected as HTMLElement | undefined;
@@ -260,7 +266,7 @@ function FadeGrid({ size }: { size: number }) {
 }
 
 /** 외곽 가이드가 화면 높이의 약 70% 를 차지하도록 줌을 맞춘다 */
-function CameraRig({ size, fit = 1 }: { size: number; fit?: number }) {
+export function CameraRig({ size, fit = 1 }: { size: number; fit?: number }) {
   const { camera, size: view } = useThree();
   useMemo(() => {
     const cam = camera as THREE.OrthographicCamera;
@@ -293,7 +299,7 @@ function GuideBox({ bbox }: { bbox: [number, number, number] }) {
   );
 }
 
-function NodeTree({ doc, parent }: { doc: Machine; parent: string | null }) {
+export function NodeTree({ doc, parent }: { doc: Machine; parent: string | null }) {
   return (
     <>
       {doc.nodes
@@ -331,10 +337,12 @@ function NodeView({ doc, node }: { doc: Machine; node: MachineNode }) {
   }, [doc.joints, node.id, node.blockType, node.params]);
 
   const running = useEditor((s) => s.running);
+  const pick = useContext(PickCtx);
   const handlers: PrimHandlers = {
     onPointerDown: (e) => {
       if (e.button !== 0) return;
       e.stopPropagation();
+      if (pick) return pick(e);
       useEditor.getState().dispatch({ cmd: 'select', ids: [node.id] });
       if (!running) beginDrag(e, node);
     },
@@ -384,7 +392,7 @@ function NodeView({ doc, node }: { doc: Machine; node: MachineNode }) {
           ))}
         </PartGroup>
       ))}
-      {(node.parent === null || selected) && prims.length > 0 && (
+      {!pick && (node.parent === null || selected) && prims.length > 0 && (
         <Html
           position={[0, 0, height + 120]}
           center
@@ -394,14 +402,14 @@ function NodeView({ doc, node }: { doc: Machine; node: MachineNode }) {
           <span
             className={`whitespace-nowrap text-[11px] px-1.5 py-0.5 rounded-sm border ${
               selected ? 'border-fg text-fg' : 'border-border text-muted'
-            } ${lit ? 'bg-[rgb(16_20_24/85%)]' : 'bg-[rgb(15_42_69/85%)]'}`}
+            } ${lit ? 'bg-[rgb(26_25_23/85%)]' : 'bg-[rgb(28_27_25/85%)]'}`}
           >
             <span className="mono font-semibold text-fg">{prefix}</span> {node.name}
           </span>
         </Html>
       )}
-      <WorkLayer parent={node.id} />
-      {look !== 'lines' && CONVEYORS.has(node.blockType ?? '') && (
+      {!pick && <WorkLayer parent={node.id} />}
+      {!pick && look !== 'lines' && CONVEYORS.has(node.blockType ?? '') && (
         <FlowChips
           length={Number(node.params['length'] ?? 2000)}
           width={Number(node.params['width'] ?? 600)}
@@ -506,8 +514,8 @@ function Prim({
           roughness={0.5}
         />
       ) : lines ? (
-        // 깊이만 기록하는 가림막: 뒤쪽 선을 숨긴다 (은선 제거). 면 자체는 밀지 않는다(바닥 격자와 깊이가 겹쳐 깜빡이므로)
-        <meshBasicMaterial colorWrite={false} />
+        // X-ray: 면을 완전히 비워 뒤까지 보이게 (클릭은 여전히 면으로 받는다). 선의 진하기로 앞뒤를 구분
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       ) : (
         <meshLambertMaterial color={TONES[p.tone]} transparent opacity={0.92} />
       )}

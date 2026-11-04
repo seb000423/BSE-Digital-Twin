@@ -13,11 +13,15 @@ const viewFromHash = (): View => {
   return VIEWS.includes(h) ? h : 'home';
 };
 
-const NAV: { id: 'machine' | 'simulate' | 'evolve'; label: string; hash: string; on: View[] }[] = [
-  { id: 'machine', label: 'Build', hash: '#machine', on: ['machine', 'factory'] },
-  { id: 'simulate', label: 'Simulate', hash: '#simulate', on: ['simulate'] },
-  { id: 'evolve', label: 'Evolve', hash: '#evolve', on: ['evolve'] },
+/** 상단 메뉴: Studio · Build(Machine | Factory) · Simulate · Evolve. Build 는 두 빌더로 나뉜 묶음 (D-42) */
+const NAV: { id: View; label: string; title: string }[] = [
+  { id: 'machine', label: 'Machine', title: '머신 빌더: 설비(컨베이어·로봇·작업대…)를 만든다' },
+  { id: 'factory', label: 'Factory', title: '팩토리 빌더: 공장 외형(건물)과 내부(설비 배치·흐름)' },
+  { id: 'simulate', label: 'Simulate', title: '만든 설비를 돌려 본다' },
+  { id: 'evolve', label: 'Evolve', title: '현장과 맞추기 (V2)' },
 ];
+const LINK =
+  'px-3 py-1.5 rounded-sm text-sm font-semibold text-muted hover:text-fg aria-[current=page]:bg-[rgb(216_207_189/14%)] aria-[current=page]:text-fg';
 
 export function App() {
   const [view, setView] = useState<View>(viewFromHash);
@@ -34,16 +38,35 @@ export function App() {
             href="#home"
             title="Studio 홈 (설비·공장 목록)"
             aria-current={view === 'home' ? 'page' : undefined}
-            className="px-3 py-1.5 rounded-sm text-sm font-semibold text-muted hover:text-fg aria-[current=page]:bg-[rgb(220_235_247/14%)] aria-[current=page]:text-fg"
+            className={LINK}
           >
             Studio
           </a>
-          {NAV.map((n) => (
+          <span
+            className="flex items-center gap-0.5 ml-1 pl-2 border-l border-border"
+            title="Build = 머신 빌더 + 팩토리 빌더"
+          >
+            <span className="text-[11px] font-semibold text-dim mr-1 select-none">Build</span>
+            {NAV.slice(0, 2).map((n) => (
+              <a
+                key={n.id}
+                href={`#${n.id}`}
+                title={n.title}
+                aria-current={view === n.id ? 'page' : undefined}
+                className={LINK}
+              >
+                {n.label}
+              </a>
+            ))}
+          </span>
+          <span className="w-px h-5 bg-border mx-1" />
+          {NAV.slice(2).map((n) => (
             <a
               key={n.id}
-              href={n.hash}
-              aria-current={n.on.includes(view) ? 'page' : undefined}
-              className="px-3 py-1.5 rounded-sm text-sm font-semibold text-muted hover:text-fg aria-[current=page]:bg-[rgb(220_235_247/14%)] aria-[current=page]:text-fg"
+              href={`#${n.id}`}
+              title={n.title}
+              aria-current={view === n.id ? 'page' : undefined}
+              className={LINK}
             >
               {n.label}
             </a>

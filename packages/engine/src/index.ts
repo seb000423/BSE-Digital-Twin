@@ -18,3 +18,19 @@ export {
   type TemplateId,
 } from './editor/templates.js';
 export { generateSequence } from './editor/sequence.js';
+export {
+  applyFactoryCommand,
+  newFactory,
+  nextTagPrefix,
+  factoryIds,
+  polylineLength,
+  type FactoryContext,
+  type FactoryApplyResult,
+} from './editor/factory-commands.js';
+export { FactoryEditor } from './editor/factory-session.js';
+export {
+  buildShell,
+  placeLine,
+  DEFAULT_SHELL,
+  type ShellOptions,
+} from './editor/factory-templates.js';

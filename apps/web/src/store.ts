@@ -100,6 +100,22 @@ export const useEditor = create<EditorState>((set, get) => {
   };
 });
 
+/** 데모를 켜는 출력 태그: 컨베이어 RUN, 로봇·프레스 START (소스는 자동) */
+const AUTO_ON = /_(RUN|START)$/;
+
+/**
+ * "실행": 데모 런타임을 만들고 바로 움직이게 한다 — RUN·START 류 출력 태그를 켜고,
+ * 동작 순서가 있으면 자동 운전까지 켠다. Build 의 실행 단추와 Simulate 가 같이 쓴다.
+ */
+export function startDemo(): void {
+  const { doc, dispatch, speed } = useEditor.getState();
+  dispatch({ cmd: 'run_demo', speed, seed: 1 });
+  for (const e of doc.io)
+    if (e.dir === 'out' && AUTO_ON.test(e.tag))
+      dispatch({ cmd: 'force_tag', tag: e.tag, value: true });
+  if (doc.sequence.steps.length > 0) dispatch({ cmd: 'auto', on: true });
+}
+
 /** 노드의 태그 접두어 (CYL1 …) */
 export function prefixOf(doc: Machine, id: string): string {
   const n = doc.nodes.find((x) => x.id === id);

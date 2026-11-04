@@ -6,7 +6,8 @@ import { Properties } from '../panels/Properties.js';
 import { BottomPanel } from '../panels/BottomPanel.js';
 import { Dock } from '../panels/Dock.js';
 import { Transport } from '../panels/Transport.js';
-import { useEditor } from '../store.js';
+import { startDemo, useEditor } from '../store.js';
+import { XrayToggle } from '../panels/XrayToggle.js';
 
 /** 실행 중에는 0.1 초마다 다시 그려 신호 값을 보여 준다 */
 export function useLiveTick(): number {
@@ -21,8 +22,9 @@ export function useLiveTick(): number {
 }
 
 export function MachineBuilder() {
-  const { doc, dispatch, running, speed, editor } = useEditor();
+  const { doc, dispatch, running, editor } = useEditor();
   const [bbox, setBbox] = useState(doc.meta.bbox.join(' × '));
+  const [xray, setXray] = useState(false);
   useEffect(() => setBbox(doc.meta.bbox.join(' × ')), [doc.meta.bbox]);
 
   const save = () => {
@@ -65,7 +67,8 @@ export function MachineBuilder() {
             <button
               type="button"
               aria-pressed={running}
-              onClick={() => dispatch({ cmd: 'run_demo', speed, seed: 1 })}
+              title="설비를 바로 움직입니다 (컨베이어·로봇 켜기, 동작 순서가 있으면 자동 운전)"
+              onClick={startDemo}
             >
               실행
             </button>
@@ -131,14 +134,15 @@ export function MachineBuilder() {
       </div>
 
       <div className="flex-1 min-h-0 flex overflow-hidden">
-        <aside className="w-[232px] shrink-0 border-r border-border overflow-auto">
+        <aside className="pane w-[232px] shrink-0 border-r border-border overflow-auto">
           <Palette />
         </aside>
         <section className="flex-1 min-w-0 relative">
-          <Viewport />
+          <Viewport look={xray ? 'lines' : 'solid'} />
+          <XrayToggle xray={xray} onChange={setXray} />
           <Hud />
         </section>
-        <aside className="w-[300px] shrink-0 border-l border-border overflow-auto">
+        <aside className="pane w-[300px] shrink-0 border-l border-border overflow-auto">
           <Properties />
         </aside>
       </div>
@@ -161,24 +165,24 @@ function Hud() {
       data-tick={tick}
     >
       <span
-        className="px-2 py-0.5 border border-border rounded-sm bg-[rgb(15_42_69/80%)] pointer-events-auto"
+        className="px-2 py-0.5 border border-border rounded-sm bg-[rgb(28_27_25/80%)] pointer-events-auto"
         title="블록 = 놓은 부품 수 · 관절 = 움직이는 축 수 · 태그 = PLC 신호 수"
       >
         블록 {doc.nodes.length} · 관절 {doc.joints.length} · 태그 {doc.io.length}
       </span>
       <span
-        className="px-2 py-0.5 border border-border rounded-sm bg-[rgb(15_42_69/80%)] pointer-events-auto"
+        className="px-2 py-0.5 border border-border rounded-sm bg-[rgb(28_27_25/80%)] pointer-events-auto"
         title="좌표 0,0,0 은 설비 바닥면의 가운데. X 가 물건이 흘러가는 방향"
       >
         원점 = 바닥면 중심 · X 투입→배출
       </span>
       {running && rt && (
-        <span className="px-2 py-0.5 border border-ok rounded-sm bg-[rgb(15_42_69/80%)] text-fg mono">
+        <span className="px-2 py-0.5 border border-ok rounded-sm bg-[rgb(28_27_25/80%)] text-fg mono">
           실행 {rt.time.toFixed(1)} s · 워크 {rt.works.length}
         </span>
       )}
       {sel && (
-        <span className="px-2 py-0.5 border border-line rounded-sm bg-[rgb(15_42_69/80%)] text-fg">
+        <span className="px-2 py-0.5 border border-line rounded-sm bg-[rgb(28_27_25/80%)] text-fg">
           선택: {sel.name}
         </span>
       )}

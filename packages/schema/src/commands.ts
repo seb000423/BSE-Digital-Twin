@@ -175,6 +175,11 @@ const place_columns = z.object({
   count: z.tuple([z.number().int(), z.number().int()]),
   height: z.number().positive(),
 });
+const draw_roof = z.object({
+  cmd: z.literal('draw_roof'),
+  polygon: z.array(Point2).min(3),
+  height: z.number().positive().describe('지붕 밑면 높이 (mm)'),
+});
 const add_opening = z.object({
   cmd: z.literal('add_opening'),
   wall: Uuid,
@@ -299,6 +304,7 @@ export const EditCommand = z.discriminatedUnion('cmd', [
   draw_slab,
   draw_wall,
   place_columns,
+  draw_roof,
   add_opening,
   draw_marking,
   place_machine,
@@ -362,6 +368,7 @@ export const COMMAND_SCOPE: Record<EditCommandName, readonly Scope[] | 'both'> =
   draw_slab: ['factory'],
   draw_wall: ['factory'],
   place_columns: ['factory'],
+  draw_roof: ['factory'],
   add_opening: ['factory'],
   draw_marking: ['factory'],
   place_machine: ['factory'],
