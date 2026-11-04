@@ -4,10 +4,10 @@
  * 바닥은 원형으로 배경에 녹이고 격자는 셰이더로 그린다(깊이 싸움 없음), 블룸은 발광체에만.
  * 코드·모델·배색은 우리 것이고 설정값만 참고 분석(docs research)에서 가져왔다.
  */
-import { useEffect, useMemo, useRef } from 'react';
+import { useContext, useEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { MeshReflectorMaterial } from '@react-three/drei';
-import { useEditor } from '../store.js';
+import { SceneCtx } from './scene-ctx.js';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
@@ -209,16 +209,16 @@ export function FlowChips({
   const n = Math.max(3, Math.round(length / 600));
   const phase = useRef(0);
   const dummy = useMemo(() => new THREE.Object3D(), []);
+  const scene = useContext(SceneCtx);
   useFrame((_, dt) => {
     const m = ref.current;
     if (!m) return;
-    const rt = useEditor.getState().runtime();
+    const rt = scene.runtime();
     const on = !!rt && rt.signals.has(runTag) && rt.signals.get(runTag) === true;
     const back = !!rt && rt.signals.has(dirTag) && rt.signals.get(dirTag) === true;
     m.visible = on;
     if (!on) return;
-    phase.current =
-      (phase.current + dt * 0.35 * useEditor.getState().speed * (back ? -1 : 1) + 1) % 1;
+    phase.current = (phase.current + dt * 0.35 * rt.speed * (back ? -1 : 1) + 1) % 1;
     for (let i = 0; i < n; i++) {
       const t = (((i / n + phase.current) % 1) + 1) % 1;
       const x = -length / 2 + t * length;
@@ -247,10 +247,11 @@ export function FlowChips({
 /** 상태등·센서 발광: 태그가 켜지면 발광 세기를 올린다 (타워램프 R/Y/G, 센서 ON) */
 export function GlowMaterial({ tag, color }: { tag: string; color: string }) {
   const ref = useRef<THREE.MeshStandardMaterial>(null);
+  const scene = useContext(SceneCtx);
   useFrame(() => {
     const m = ref.current;
     if (!m) return;
-    const rt = useEditor.getState().runtime();
+    const rt = scene.runtime();
     const on = !!rt && rt.signals.has(tag) && rt.signals.get(tag) === true;
     const target = on ? 3 : 0.15;
     m.emissiveIntensity += (target - m.emissiveIntensity) * 0.2;

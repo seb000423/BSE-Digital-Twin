@@ -1,11 +1,11 @@
 /**
- * 보기 전환 (04 §9.4): 면 보기 ↔ X-ray (투시 선화: 면을 비우고 외곽선만 남겨 속까지 보임).
+ * 보기 전환 (04 §9.4): Solid(면) ↔ X-ray (투시 선화: 면을 비우고 외곽선만 남겨 속까지 보임). 둘 다 영어 표기.
  * 뷰포트 왼쪽 위에 떠 있는 작은 단추 두 개. 보기만 바꾸고 문서는 건드리지 않는다.
  */
 export function XrayToggle({
   xray,
   onChange,
-  solidLabel = '면',
+  solidLabel = 'Solid',
 }: {
   xray: boolean;
   onChange: (x: boolean) => void;

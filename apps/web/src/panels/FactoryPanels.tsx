@@ -1,5 +1,5 @@
 /**
- * 팩토리빌더 패널들: 왼쪽 건물(뼈대 숫자) · 설비 카드(놓기) · 오른쪽 속성(선택한 개체) · 아래 설비 표·흐름·명령 기록.
+ * 팩토리빌더 패널들: 왼쪽 건물(뼈대 숫자) · 설비 카드(놓기) · 놓인 설비 · 오른쪽 속성(선택한 개체) · 흐름.
  * 전부 useFactory.dispatch 로 명령만 보낸다.
  */
 import { useEffect, useState } from 'react';
@@ -280,10 +280,10 @@ export function FactoryProperties() {
         </li>
         <li>
           아래 <b className="text-fg">흐름</b>에서 앞 설비 → 뒤 설비를 이으면 자재 흐름이 화살표로
-          보입니다.
+          보입니다. 다 놓았으면 <b className="text-fg">Simulate</b> 에서 공장 전체를 돌려 봅니다.
         </li>
         <li>
-          <b className="text-fg">X-ray</b>로 벽을 뚫어 보고, "지붕 얹음"으로 외형을 봅니다.
+          <b className="text-fg">X-ray</b>로 벽을 뚫어 보고, "지붕"을 켜면 외형을 봅니다.
         </li>
       </ol>
       <h3 className="panel-h m-0">공장</h3>
@@ -491,9 +491,9 @@ function WallProps({
   );
 }
 
-/* ── 아래: 설비 표 · 흐름 · 명령 기록 ── */
-export function FactoryBottom() {
-  const { doc, selection, dispatch, log } = useFactory();
+/* ── 오른쪽 아래: 흐름 ── */
+export function FlowPanel() {
+  const { doc, dispatch } = useFactory();
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const name = (id: string) => {
@@ -505,134 +505,60 @@ export function FactoryBottom() {
     const r = dispatch({ cmd: 'connect_flow', from: `${from}.out`, to: `${to}.in` });
     if (!r.ok) alert(r.error);
   };
+  const Sel = ({ v, set, label }: { v: string; set: (s: string) => void; label: string }) => (
+    <select className="field" value={v} onChange={(e) => set(e.target.value)} aria-label={label}>
+      <option value="">{label}</option>
+      {doc.machines.map((m) => (
+        <option key={m.id} value={m.id}>
+          {name(m.id)}
+        </option>
+      ))}
+    </select>
+  );
   return (
-    <div className="h-full grid text-xs grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-      <div className="min-w-0 flex flex-col overflow-hidden border-r border-border">
-        <h3 className="panel-h m-0">
-          설비 표 <span className="font-normal text-muted">{doc.machines.length} 대</span>
-          <span className="ml-auto font-normal text-dim">행을 누르면 선택</span>
-        </h3>
-        <div className="overflow-auto flex-1">
-          <table className="tbl">
-            <thead>
-              <tr>
-                <th>접두어</th>
-                <th>설비</th>
-                <th className="text-right">X</th>
-                <th className="text-right">Y</th>
-                <th className="text-right">회전</th>
-                <th className="text-right">사이클</th>
-                <th>등급</th>
-              </tr>
-            </thead>
-            <tbody>
-              {doc.machines.map((m) => {
-                const e = machineOf(m.ref);
-                return (
-                  <tr
-                    key={m.id}
-                    className={`cursor-pointer hover:bg-[rgb(216_207_189/6%)] ${
-                      selection.includes(m.id) ? 'bg-[rgb(216_207_189/12%)]' : ''
-                    }`}
-                    onClick={() => dispatch({ cmd: 'select', ids: [m.id] })}
-                  >
-                    <td className="mono font-semibold text-fg">{m.tagPrefix}</td>
-                    <td>{e?.name ?? '설비 없음'}</td>
-                    <td className="text-right mono">{m.transform.position[0]}</td>
-                    <td className="text-right mono">{m.transform.position[1]}</td>
-                    <td className="text-right mono">{m.transform.rotation[2]}°</td>
-                    <td className="text-right mono">{e ? `${e.doc.card.cycle_time} s` : '—'}</td>
-                    <td>{m.fidelityOverride ?? e?.doc.meta.fidelity ?? '—'}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div className="min-w-0 grid grid-rows-[minmax(0,3fr)_minmax(0,2fr)] overflow-hidden">
-        <div className="min-h-0 flex flex-col overflow-hidden border-b border-border">
-          <h3 className="panel-h m-0">
-            흐름 <span className="font-normal text-muted">{doc.flows.length}</span>
-            <span className="ml-auto mr-14 flex items-center gap-1">
-              <select
-                className="field min-h-6 w-32"
-                value={from}
-                onChange={(e) => setFrom(e.target.value)}
-                aria-label="출발 설비"
-              >
-                <option value="">출발 설비</option>
-                {doc.machines.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {name(m.id)}
-                  </option>
-                ))}
-              </select>
-              <span className="text-dim">→</span>
-              <select
-                className="field min-h-6 w-32"
-                value={to}
-                onChange={(e) => setTo(e.target.value)}
-                aria-label="도착 설비"
-              >
-                <option value="">도착 설비</option>
-                {doc.machines.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {name(m.id)}
-                  </option>
-                ))}
-              </select>
-              <button
-                type="button"
-                className="btn btn-primary min-h-6 px-2 text-[11px] whitespace-nowrap"
-                disabled={!from || !to || from === to}
-                onClick={connect}
-              >
-                잇기
-              </button>
+    <div className="text-xs">
+      <h3
+        className="panel-h m-0"
+        title="자재가 어느 설비에서 어느 설비로 가는지. 3D 에 앰버 화살표로 보입니다"
+      >
+        흐름 <span className="font-normal text-muted">{doc.flows.length}</span>
+      </h3>
+      <ul className="m-0 p-0 list-none">
+        {doc.flows.length === 0 && (
+          <li className="px-3 py-2 text-muted">
+            아직 흐름이 없습니다. 아래에서 출발 → 도착을 골라 "잇기".
+          </li>
+        )}
+        {doc.flows.map((f) => (
+          <li key={f.id} className="px-3 py-1.5 border-b border-border flex items-center gap-2">
+            <span className="truncate">
+              {name(f.from.split('.')[0] ?? '')} <span className="text-accent">→</span>{' '}
+              {name(f.to.split('.')[0] ?? '')}
             </span>
-          </h3>
-          <ul className="overflow-auto flex-1 m-0 p-0 list-none">
-            {doc.flows.length === 0 && (
-              <li className="px-3 py-2 text-muted">
-                아직 흐름이 없습니다. 출발 → 도착 설비를 골라 "잇기".
-              </li>
-            )}
-            {doc.flows.map((f) => (
-              <li key={f.id} className="px-3 py-1.5 border-b border-border flex items-center gap-2">
-                <span className="truncate">
-                  {name(f.from.split('.')[0] ?? '')} <span className="text-accent">→</span>{' '}
-                  {name(f.to.split('.')[0] ?? '')}
-                </span>
-                <button
-                  type="button"
-                  className="btn ml-auto min-h-6 px-2 text-[11px]"
-                  onClick={() => dispatch({ cmd: 'remove', ids: [f.id] })}
-                >
-                  끊기
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="min-h-0 flex flex-col overflow-hidden">
-          <h3 className="panel-h m-0">
-            명령 기록 <span className="font-normal text-muted">{log.length}</span>
-          </h3>
-          <ul className="overflow-auto flex-1 m-0 p-0 list-none mono">
-            {[...log].reverse().map((e, i) => (
-              <li
-                key={i}
-                className={`px-3 py-0.5 truncate ${e.result.ok ? 'text-muted' : 'text-alarm'}`}
-                title={JSON.stringify(e.cmd)}
-              >
-                {e.cmd.cmd}
-                {e.result.ok ? '' : ` ✗ ${e.result.error}`}
-              </li>
-            ))}
-          </ul>
-        </div>
+            <button
+              type="button"
+              className="btn ml-auto min-h-6 px-2 text-[11px] whitespace-nowrap"
+              onClick={() => dispatch({ cmd: 'remove', ids: [f.id] })}
+            >
+              끊기
+            </button>
+          </li>
+        ))}
+      </ul>
+      <div className="kv p-3">
+        <span>출발</span>
+        <Sel v={from} set={setFrom} label="출발 설비" />
+        <span>도착</span>
+        <Sel v={to} set={setTo} label="도착 설비" />
       </div>
+      <button
+        type="button"
+        className="btn btn-primary mx-3 mb-3"
+        disabled={!from || !to || from === to}
+        onClick={connect}
+      >
+        잇기
+      </button>
     </div>
   );
 }

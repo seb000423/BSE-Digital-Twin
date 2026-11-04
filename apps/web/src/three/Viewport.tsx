@@ -26,6 +26,7 @@ import {
   LitRenderer,
   LitRing,
 } from './lit.js';
+import { SceneCtx } from './scene-ctx.js';
 
 export const MM = 0.001;
 // 편집 보기 배색 (D-41): 차콜 면 3단 + 베이지 선. 실사풍 배색은 lit.tsx 의 LIT
@@ -35,11 +36,6 @@ const SEL = '#ffffff';
 const SNAP = 50;
 export type Look = 'solid' | 'lines' | 'lit';
 export const LookCtx = createContext<Look>('solid');
-/**
- * 팩토리 뷰포트가 설비 모형을 그릴 때 쓴다: 값이 있으면 블록 클릭이 (블록 선택·끌기 대신) 이 함수로 가고,
- * 라벨·워크·흐름 빛처럼 머신빌더 런타임에 묶인 것은 그리지 않는다.
- */
-export const PickCtx = createContext<((e: ThreeEvent<PointerEvent>) => void) | null>(null);
 export const deg = (d: number) => (d * Math.PI) / 180;
 
 /** 노드 id → three 그룹 (끌기 미리보기와 부모 좌표 변환에 쓴다) */
@@ -312,7 +308,7 @@ export function NodeTree({ doc, parent }: { doc: Machine; parent: string | null 
 }
 
 function NodeView({ doc, node }: { doc: Machine; node: MachineNode }) {
-  const selected = useEditor((s) => s.selection.includes(node.id));
+  const selectedInEditor = useEditor((s) => s.selection.includes(node.id));
   const prims = useMemo<Primitive[]>(() => {
     if (node.type !== 'block' || !node.blockType) return [];
     try {
@@ -337,7 +333,9 @@ function NodeView({ doc, node }: { doc: Machine; node: MachineNode }) {
   }, [doc.joints, node.id, node.blockType, node.params]);
 
   const running = useEditor((s) => s.running);
-  const pick = useContext(PickCtx);
+  const scene = useContext(SceneCtx);
+  const pick = scene.pick;
+  const selected = pick ? false : selectedInEditor;
   const handlers: PrimHandlers = {
     onPointerDown: (e) => {
       if (e.button !== 0) return;
@@ -347,18 +345,21 @@ function NodeView({ doc, node }: { doc: Machine; node: MachineNode }) {
       if (!running) beginDrag(e, node);
     },
     onPointerMove: (e) => {
+      if (pick) return scene.dragMove?.(e);
       if (drag?.id === node.id) {
         e.stopPropagation();
         dragTo(e);
       }
     },
     onPointerUp: (e) => {
+      if (pick) return scene.dragUp?.(e);
       if (drag?.id === node.id) {
         e.stopPropagation();
         endDrag(e);
       }
     },
     onLostPointerCapture: (e) => {
+      if (pick) return scene.dragUp?.(e);
       if (drag?.id === node.id) endDrag(e);
     },
   };
@@ -387,12 +388,12 @@ function NodeView({ doc, node }: { doc: Machine; node: MachineNode }) {
               p={p}
               selected={selected}
               h={handlers}
-              glow={glowOf(node, prefix, p, i)}
+              glow={scene.effects ? glowOf(node, prefix, p, i) : null}
             />
           ))}
         </PartGroup>
       ))}
-      {!pick && (node.parent === null || selected) && prims.length > 0 && (
+      {scene.labels && (node.parent === null || selected) && prims.length > 0 && (
         <Html
           position={[0, 0, height + 120]}
           center
@@ -408,8 +409,8 @@ function NodeView({ doc, node }: { doc: Machine; node: MachineNode }) {
           </span>
         </Html>
       )}
-      {!pick && <WorkLayer parent={node.id} />}
-      {!pick && look !== 'lines' && CONVEYORS.has(node.blockType ?? '') && (
+      {scene.effects && <WorkLayer parent={node.id} />}
+      {scene.effects && look !== 'lines' && CONVEYORS.has(node.blockType ?? '') && (
         <FlowChips
           length={Number(node.params['length'] ?? 2000)}
           width={Number(node.params['width'] ?? 600)}
@@ -432,10 +433,11 @@ function PartGroup({
   children: React.ReactNode;
 }) {
   const ref = useRef<THREE.Group>(null);
+  const scene = useContext(SceneCtx);
   useFrame(() => {
     const g = ref.current;
     if (!g || !joint) return;
-    const rt = useEditor.getState().runtime();
+    const rt = scene.runtime();
     const st = rt?.jointState(joint.id);
     const pos = st ? st.pos : joint.home;
     const a = joint.axis;
@@ -544,9 +546,10 @@ function Prim({
 const POOL = 32;
 function WorkLayer({ parent }: { parent: string }) {
   const lit = useContext(LookCtx) === 'lit';
+  const scene = useContext(SceneCtx);
   const refs = useRef<(THREE.Mesh | null)[]>([]);
   useFrame(() => {
-    const rt = useEditor.getState().runtime();
+    const rt = scene.runtime();
     const works = rt ? rt.works.filter((w) => w.parent === parent) : [];
     for (let i = 0; i < POOL; i++) {
       const m = refs.current[i];

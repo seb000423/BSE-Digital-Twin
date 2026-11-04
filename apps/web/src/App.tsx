@@ -13,11 +13,19 @@ const viewFromHash = (): View => {
   return VIEWS.includes(h) ? h : 'home';
 };
 
-/** 상단 메뉴: Studio · Build(Machine | Factory) · Simulate · Evolve. Build 는 두 빌더로 나뉜 묶음 (D-42) */
+/** 상단 메뉴: Studio · Build(Factory | Machine) · Simulate · Evolve. 공장을 짓고 → 설비를 들여오는 순서 (D-42·D-43) */
 const NAV: { id: View; label: string; title: string }[] = [
-  { id: 'machine', label: 'Machine', title: '머신 빌더: 설비(컨베이어·로봇·작업대…)를 만든다' },
-  { id: 'factory', label: 'Factory', title: '팩토리 빌더: 공장 외형(건물)과 내부(설비 배치·흐름)' },
-  { id: 'simulate', label: 'Simulate', title: '만든 설비를 돌려 본다' },
+  {
+    id: 'factory',
+    label: 'Factory',
+    title: '팩토리 빌더: 공장을 짓고(외형) 설비를 들여놓는다(내부)',
+  },
+  {
+    id: 'machine',
+    label: 'Machine',
+    title: '머신 빌더: 설비(컨베이어·로봇·작업대…)를 만들고 동작을 점검한다',
+  },
+  { id: 'simulate', label: 'Simulate', title: '공장 안에서 설비들이 함께 도는 전체 흐름 · 관제' },
   { id: 'evolve', label: 'Evolve', title: '현장과 맞추기 (V2)' },
 ];
 const LINK =

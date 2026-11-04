@@ -158,7 +158,7 @@ export function Home() {
             최근 실행 <span className="font-normal text-muted">2</span>
             <span className="text-muted font-normal">· 예시 · 정식 실행은 4단계</span>
             <a href="#simulate" className="btn ml-auto min-h-8 no-underline">
-              Simulate 열기
+              공장 관제(Simulate) 열기
             </a>
           </h2>
           <table className="tbl">

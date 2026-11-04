@@ -1,4 +1,4 @@
-/** 아래: 신호 표(실행 중 실시간 값) · 수동 조작 패널(force_tag) · 명령 기록 */
+/** 아래: 신호 표(실행 중 실시간 값) · 동작 순서 · 수동 조작 패널(force_tag). 명령 기록은 화면에 안 보이고 편집기 안에만 남는다 */
 import { useRef, useState } from 'react';
 import { useLiveTick } from '../screens/MachineBuilder.js';
 import { describeTag } from '@bse/blocks';
@@ -6,7 +6,7 @@ import { prefixOf, useEditor } from '../store.js';
 import { SequencePanel } from './SequencePanel.js';
 
 export function BottomPanel() {
-  const { doc, selection, dispatch, running, log } = useEditor();
+  const { doc, selection, dispatch, running } = useEditor();
   useLiveTick();
   const rt = useEditor.getState().runtime();
   const prefix = selection[0] ? prefixOf(doc, selection[0]) : '';
@@ -144,8 +144,10 @@ export function BottomPanel() {
       />
       <div className="min-w-0 grid grid-rows-[minmax(0,3fr)_minmax(0,2fr)] overflow-hidden">
         <SequencePanel />
-        <div className="flex flex-col min-h-0 border-t border-border">
-          <h3 className="panel-h m-0">수동 조작 · 명령 기록</h3>
+        <div className="flex flex-col min-h-0 border-t border-border overflow-auto">
+          <h3 className="panel-h m-0" title="실행 중에 태그를 손으로 켜고 끕니다">
+            수동 조작
+          </h3>
           <div className="px-3 py-2 flex flex-wrap gap-1.5 border-b border-border">
             {running ? (
               outs.slice(0, 12).map((e) => (
@@ -166,20 +168,8 @@ export function BottomPanel() {
               </span>
             )}
           </div>
-          <div className="overflow-auto flex-1 px-3 py-1.5 mono leading-5">
-            {[...log].reverse().map((l, i) => (
-              <div key={i} className={l.result.ok ? '' : 'text-alarm'}>
-                <span className="text-dim">{l.cmd.cmd}</span> {JSON.stringify(stripCmd(l.cmd))}
-                {!l.result.ok && ` → ${l.result.error}`}
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </div>
   );
-}
-
-function stripCmd(cmd: Record<string, unknown>): Record<string, unknown> {
-  return Object.fromEntries(Object.entries(cmd).filter(([k]) => k !== 'cmd'));
 }

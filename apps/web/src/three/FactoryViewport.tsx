@@ -1,30 +1,28 @@
 /**
- * 공장 3D 뷰포트 (팩토리빌더 1차): 건물(바닥·벽·기둥·지붕·개구부) + 설비 인스턴스(설비 문서를 그대로 그림) + 흐름 선.
- * 좌표 변환·배색·블록 그리기는 설비 뷰포트(Viewport.tsx)의 것을 그대로 쓴다. 보기 = 면(solid) / X-ray(lines).
- * 설비를 누른 채 끌면 바닥 위에서 옮겨지고(100 mm 격자), 놓을 때 move 명령 한 번. 건물 요소는 클릭으로 선택만.
+ * 공장 3D 뷰포트: 건물(바닥·벽·기둥·지붕·개구부) + 설비 인스턴스(설비 문서를 그대로 그림) + 흐름 선.
+ * 좌표 변환·배색·블록 그리기는 설비 뷰포트(Viewport.tsx)의 것을 그대로 쓴다.
+ * 두 쓰임: mode='edit' (팩토리 빌더: 설비 끌어 옮기기 100 mm, 벽·기둥·문 클릭 선택) /
+ *          mode='sim'  (Simulate 관제: 공장 런타임의 설비들이 움직이고, 클릭은 관제 선택만).
+ * 보기: 'solid' 면 · 'lines' X-ray · 'lit' 실사풍(Simulate).
  */
 import { useCallback, useContext, useMemo, useRef, type ReactNode } from 'react';
-import { Canvas, type ThreeEvent } from '@react-three/fiber';
+import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import { Edges, Html, Line, OrbitControls, OrthographicCamera } from '@react-three/drei';
 import * as THREE from 'three';
 import type { Factory, MachineInstance } from '@bse/schema';
-import {
-  CameraRig,
-  DragGate,
-  LINE,
-  LookCtx,
-  MM,
-  NodeTree,
-  PickCtx,
-  TONES,
-  deg,
-} from './Viewport.js';
+import { SIGNAL_TICK_MS } from '@bse/engine';
+import { CameraRig, LINE, LookCtx, MM, NodeTree, TONES, deg, type Look } from './Viewport.js';
+import { LIT, LitBloom, LitFloor, LitLights, LitRenderer } from './lit.js';
+import { SceneCtx, type SceneCtxValue } from './scene-ctx.js';
 import { floorSize, machineOf, useFactory } from '../store-factory.js';
+import { useSim } from '../store-sim.js';
 
 const SNAP = 100;
 const ACCENT = '#f2a93b';
 const SEL = '#ffffff';
 type P2 = [number, number];
+type Mode = 'edit' | 'sim';
+const ModeRef = { current: 'edit' as Mode };
 
 let root: THREE.Group | null = null;
 interface Drag {
@@ -33,6 +31,7 @@ interface Drag {
   hit0: THREE.Vector3;
   start: [number, number, number];
   moved: boolean;
+  controls: { enabled: boolean } | null;
 }
 let drag: Drag | null = null;
 const FLOOR = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
@@ -56,58 +55,97 @@ function dragTo(e: ThreeEvent<PointerEvent>): [number, number, number] | null {
 function endDrag(e: ThreeEvent<PointerEvent>): void {
   if (!drag) return;
   const pos = dragTo(e);
-  const { id, moved } = drag;
+  const { id, moved, controls } = drag;
   drag = null;
+  if (controls) controls.enabled = true;
   const t = e.target as Element;
   if (t.hasPointerCapture(e.pointerId)) t.releasePointerCapture(e.pointerId);
   if (pos && moved)
     useFactory.getState().dispatch({ cmd: 'move', id, transform: { position: pos } });
 }
 
-export function FactoryViewport({ xray = false }: { xray?: boolean }) {
+export function FactoryViewport({ look = 'solid', mode = 'edit' }: { look?: Look; mode?: Mode }) {
   const doc = useFactory((s) => s.doc);
   const roof = useFactory((s) => s.roof);
   const [w, d] = floorSize(doc);
   const size = Math.max(w, d) * MM;
-  const look = xray ? 'lines' : 'solid';
+  const lit = look === 'lit';
+  ModeRef.current = mode;
+  const missed = () =>
+    mode === 'sim'
+      ? useSim.getState().select(null)
+      : useFactory.getState().dispatch({ cmd: 'select', ids: [] });
   return (
     <Canvas
       dpr={[1, 2]}
-      gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
-      onPointerMissed={() => useFactory.getState().dispatch({ cmd: 'select', ids: [] })}
+      gl={{ antialias: true, alpha: !lit, powerPreference: 'high-performance' }}
+      shadows={lit}
+      onPointerMissed={missed}
       style={{
-        background: 'radial-gradient(ellipse 60% 55% at 50% 60%, rgb(53 51 44 / 90%), transparent)',
+        background: lit
+          ? LIT.bg
+          : 'radial-gradient(ellipse 60% 55% at 50% 60%, rgb(53 51 44 / 90%), transparent)',
       }}
     >
       <OrthographicCamera
         makeDefault
-        position={[size * 1.6, size * 1.3, size * 1.6]}
+        position={lit ? [size * 1.5, size * 1.5, size * 1.5] : [size * 1.6, size * 1.3, size * 1.6]}
         near={0.1}
         far={size * 8}
       />
       <OrbitControls makeDefault maxPolarAngle={Math.PI * 0.44} target={[0, 0, 0]} />
       <CameraRig size={size} fit={0.95} />
-      {!xray && <DragGate />}
-      <ambientLight intensity={0.6} />
-      <directionalLight position={[-6, 10, 4]} intensity={0.9} />
-      <directionalLight position={[8, 4, -8]} intensity={0.35} color="#e8d9bb" />
-      <gridHelper args={[size * 2.5, Math.round(size * 2.5), LINE, LINE]} position={[0, -0.02, 0]}>
-        <lineBasicMaterial attach="material" color={LINE} transparent opacity={0.16} />
-      </gridHelper>
+      {lit ? (
+        <>
+          <LitRenderer />
+          <LitLights size={size} />
+          <LitFloor size={size} />
+          <LitBloom />
+        </>
+      ) : (
+        <>
+          <ambientLight intensity={0.6} />
+          <directionalLight position={[-6, 10, 4]} intensity={0.9} />
+          <directionalLight position={[8, 4, -8]} intensity={0.35} color="#e8d9bb" />
+          <gridHelper
+            args={[size * 2.5, Math.round(size * 2.5), LINE, LINE]}
+            position={[0, -0.02, 0]}
+          >
+            <lineBasicMaterial attach="material" color={LINE} transparent opacity={0.16} />
+          </gridHelper>
+        </>
+      )}
       <LookCtx.Provider value={look}>
         <group rotation={[-Math.PI / 2, 0, 0]} scale={MM} ref={(g) => void (root = g)}>
           <Building doc={doc} roof={roof} />
           {doc.machines.map((m) => (
-            <MachineInst key={m.id} inst={m} />
+            <MachineInst key={m.id} inst={m} mode={mode} />
           ))}
           <Flows doc={doc} />
+          {mode === 'sim' && <SimRunner />}
         </group>
       </LookCtx.Provider>
     </Canvas>
   );
 }
 
-/** 건물 부품 상자 하나: 면 보기면 채우고, X-ray 면 면을 비워 선만 남긴다. 클릭 = 선택 */
+/** Simulate: 렌더 프레임마다 지나간 시간만큼 공장 런타임을 10 ms 틱으로 돌린다 (배속 반영) */
+function SimRunner() {
+  const acc = useRef(0);
+  useFrame((_, dt) => {
+    const fr = useSim.getState().fr;
+    if (!fr) return;
+    acc.current += Math.min(dt, 0.1) * 1000 * fr.speed;
+    const ticks = Math.floor(acc.current / SIGNAL_TICK_MS);
+    if (ticks > 0) {
+      fr.step(ticks);
+      acc.current -= ticks * SIGNAL_TICK_MS;
+    }
+  });
+  return null;
+}
+
+/** 건물 부품 상자 하나: 면 보기면 채우고, X-ray 면 면을 비워 선만 남긴다. 클릭 = 선택 (편집 모드) */
 function Part({
   id,
   size,
@@ -115,7 +153,6 @@ function Part({
   rotationZ = 0,
   tone = 0,
   opacity = 1,
-  xray,
   children,
 }: {
   id: string;
@@ -124,16 +161,22 @@ function Part({
   rotationZ?: number;
   tone?: 0 | 1 | 2;
   opacity?: number;
-  xray: boolean;
   children?: ReactNode;
 }) {
-  const selected = useFactory((s) => s.selection.includes(id));
+  const look = useContext(LookCtx);
+  const xray = look === 'lines';
+  const lit = look === 'lit';
+  const selected = useFactory((s) => ModeRef.current === 'edit' && s.selection.includes(id));
+  // 실사풍(관제)에선 벽을 반투명으로 낮춰 안이 보이게
+  const alpha = lit ? Math.min(opacity, 0.5) : opacity;
   return (
     <mesh
       position={position}
       rotation={[0, 0, rotationZ]}
+      castShadow={lit}
+      receiveShadow={lit}
       onPointerDown={(e) => {
-        if (e.button !== 0) return;
+        if (e.button !== 0 || ModeRef.current !== 'edit') return;
         e.stopPropagation();
         useFactory.getState().dispatch({ cmd: 'select', ids: [id] });
       }}
@@ -141,18 +184,28 @@ function Part({
       <boxGeometry args={size} />
       {xray ? (
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      ) : lit ? (
+        <meshStandardMaterial
+          color={LIT.tones[tone]}
+          metalness={0.2}
+          roughness={0.7}
+          transparent={alpha < 1}
+          opacity={alpha}
+        />
       ) : (
-        <meshLambertMaterial color={TONES[tone]} transparent opacity={opacity} />
+        <meshLambertMaterial color={TONES[tone]} transparent={alpha < 1} opacity={alpha} />
       )}
-      <Edges
-        color={selected ? SEL : LINE}
-        threshold={15}
-        transparent
-        opacity={xray ? ([0.35, 0.6, 0.9][tone] ?? 1) : selected ? 1 : 0.8}
-        polygonOffset
-        polygonOffsetFactor={-1}
-        polygonOffsetUnits={-2}
-      />
+      {(!lit || selected) && (
+        <Edges
+          color={selected ? SEL : LINE}
+          threshold={15}
+          transparent
+          opacity={xray ? ([0.35, 0.6, 0.9][tone] ?? 1) : selected ? 1 : 0.8}
+          polygonOffset
+          polygonOffsetFactor={-1}
+          polygonOffsetUnits={-2}
+        />
+      )}
       {children}
     </mesh>
   );
@@ -160,7 +213,9 @@ function Part({
 
 /** 바닥·벽(개구부는 비워서)·기둥·지붕 */
 function Building({ doc, roof }: { doc: Factory; roof: boolean }) {
-  const xray = useContext(LookCtx) === 'lines';
+  const look = useContext(LookCtx);
+  const xray = look === 'lines';
+  const lit = look === 'lit';
   const b = doc.building;
   const slabs = useMemo(
     () =>
@@ -183,32 +238,28 @@ function Building({ doc, roof }: { doc: Factory; roof: boolean }) {
   );
   return (
     <>
-      {slabs.map(({ s, geo }) => (
-        <mesh
-          key={s.id}
-          geometry={geo}
-          position={[0, 0, -s.thickness]}
-          onPointerDown={(e) => {
-            if (e.button !== 0) return;
-            e.stopPropagation();
-            useFactory.getState().dispatch({ cmd: 'select', ids: [s.id] });
-          }}
-        >
-          {xray ? (
-            <meshBasicMaterial transparent opacity={0} depthWrite={false} />
-          ) : (
-            <meshLambertMaterial color="#232220" />
-          )}
-          <Edges color={LINE} transparent opacity={0.7} />
-        </mesh>
-      ))}
+      {!lit &&
+        slabs.map(({ s, geo }) => (
+          <mesh
+            key={s.id}
+            geometry={geo}
+            position={[0, 0, -s.thickness]}
+            onPointerDown={(e) => {
+              if (e.button !== 0 || ModeRef.current !== 'edit') return;
+              e.stopPropagation();
+              useFactory.getState().dispatch({ cmd: 'select', ids: [s.id] });
+            }}
+          >
+            {xray ? (
+              <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+            ) : (
+              <meshLambertMaterial color="#232220" />
+            )}
+            <Edges color={LINE} transparent opacity={0.7} />
+          </mesh>
+        ))}
       {b.walls.map((w) => (
-        <WallView
-          key={w.id}
-          wall={w}
-          openings={b.openings.filter((o) => o.wall === w.id)}
-          xray={xray}
-        />
+        <WallView key={w.id} wall={w} openings={b.openings.filter((o) => o.wall === w.id)} />
       ))}
       {b.columns.map((c) => (
         <Part
@@ -217,7 +268,6 @@ function Building({ doc, roof }: { doc: Factory; roof: boolean }) {
           size={[c.size[0], c.size[1], c.height]}
           position={[c.position[0], c.position[1], c.height / 2]}
           tone={1}
-          xray={xray}
         />
       ))}
       {roof &&
@@ -226,9 +276,14 @@ function Building({ doc, roof }: { doc: Factory; roof: boolean }) {
             {xray ? (
               <meshBasicMaterial transparent opacity={0} depthWrite={false} />
             ) : (
-              <meshLambertMaterial color={TONES[1]} transparent opacity={0.55} />
+              // 지붕은 밝은 베이지 반투명: 얹었는지 한눈에 보이게
+              <meshLambertMaterial
+                color={lit ? LIT.tones[2] : '#8e877a'}
+                transparent
+                opacity={0.6}
+              />
             )}
-            <Edges color={LINE} transparent opacity={0.8} />
+            <Edges color={LINE} transparent opacity={0.9} />
           </mesh>
         ))}
     </>
@@ -239,11 +294,9 @@ function Building({ doc, roof }: { doc: Factory; roof: boolean }) {
 function WallView({
   wall,
   openings,
-  xray,
 }: {
   wall: Factory['building']['walls'][number];
   openings: Factory['building']['openings'];
-  xray: boolean;
 }) {
   const pieces = useMemo(() => {
     const out: {
@@ -286,7 +339,6 @@ function WallView({
             opacity: 1,
             id: wall.id,
           });
-        // 인방(개구부 위)
         if (wall.height > o.height)
           out.push({
             key: `${i}-h-${o.id}`,
@@ -297,7 +349,6 @@ function WallView({
             opacity: 1,
             id: wall.id,
           });
-        // 문짝·셔터: 얇고 반투명한 판
         out.push({
           key: `${i}-o-${o.id}`,
           size: [o.width, Math.max(40, wall.thickness * 0.25), o.height],
@@ -334,7 +385,6 @@ function WallView({
           rotationZ={p.rot}
           tone={p.tone}
           opacity={p.opacity}
-          xray={xray}
         />
       ))}
     </>
@@ -342,20 +392,54 @@ function WallView({
 }
 
 /** 설비 인스턴스: 설비 문서를 그 자리에 그린다. 설비가 없으면(다른 설비를 열어서) 점선 상자 */
-function MachineInst({ inst }: { inst: MachineInstance }) {
-  const selected = useFactory((s) => s.selection.includes(inst.id));
+function MachineInst({ inst, mode }: { inst: MachineInstance; mode: Mode }) {
+  const selEdit = useFactory((s) => s.selection.includes(inst.id));
+  const selSim = useSim((s) => s.selected === inst.id);
+  const selected = mode === 'sim' ? selSim : selEdit;
   const entry = machineOf(inst.ref);
   const g = useRef<THREE.Group>(null);
+  const { controls } = useThree();
+  const look = useContext(LookCtx);
+  const lit = look === 'lit';
   const pick = useCallback(
     (e: ThreeEvent<PointerEvent>) => {
+      if (mode === 'sim') {
+        useSim.getState().select(inst.id);
+        return;
+      }
       useFactory.getState().dispatch({ cmd: 'select', ids: [inst.id] });
       if (!g.current) return;
       const hit0 = new THREE.Vector3();
       if (!e.ray.intersectPlane(FLOOR, hit0)) return;
-      drag = { id: inst.id, g: g.current, hit0, start: inst.transform.position, moved: false };
+      // 끄는 동안 화면 회전(OrbitControls)을 끈다 — 설비와 화면이 같이 움직이지 않게
+      const ctl = controls as { enabled: boolean } | null;
+      if (ctl) ctl.enabled = false;
+      drag = {
+        id: inst.id,
+        g: g.current,
+        hit0,
+        start: inst.transform.position,
+        moved: false,
+        controls: ctl,
+      };
       (e.target as Element).setPointerCapture(e.pointerId);
     },
-    [inst],
+    [inst, mode, controls],
+  );
+  const scene = useMemo<SceneCtxValue>(
+    () => ({
+      runtime: () => useSim.getState().fr?.runtimeOf(inst.id) ?? null,
+      pick,
+      dragMove: (e) => {
+        if (drag?.id === inst.id) dragTo(e);
+      },
+      dragUp: (e) => {
+        if (drag?.id === inst.id) endDrag(e);
+      },
+      labels: false,
+      effects: mode === 'sim',
+    }),
+    [inst.id, pick, mode],
   );
   const r = inst.transform.rotation;
   const fp = entry?.doc.card.footprint ?? [2000, 2000];
@@ -382,7 +466,7 @@ function MachineInst({ inst }: { inst: MachineInstance }) {
         }
       }}
     >
-      <PickCtx.Provider value={pick}>
+      <SceneCtx.Provider value={scene}>
         {entry ? (
           <NodeTree doc={entry.doc} parent={null} />
         ) : (
@@ -399,15 +483,17 @@ function MachineInst({ inst }: { inst: MachineInstance }) {
             <Edges color={LINE} />
           </mesh>
         )}
-      </PickCtx.Provider>
-      {/* 바닥 자리 표시: 선택하면 앰버, 아니면 옅게 */}
-      <lineSegments geometry={footprint} position={[0, 0, 5]}>
-        <lineBasicMaterial
-          color={selected ? ACCENT : LINE}
-          transparent
-          opacity={selected ? 1 : 0.35}
-        />
-      </lineSegments>
+      </SceneCtx.Provider>
+      {/* 바닥 자리 표시: 선택하면 앰버, 아니면 옅게 (실사풍에선 선택 때만) */}
+      {(!lit || selected) && (
+        <lineSegments geometry={footprint} position={[0, 0, 5]}>
+          <lineBasicMaterial
+            color={selected ? ACCENT : LINE}
+            transparent
+            opacity={selected ? 1 : 0.35}
+          />
+        </lineSegments>
+      )}
       <Html
         position={[0, 0, h + 400]}
         center
@@ -415,9 +501,9 @@ function MachineInst({ inst }: { inst: MachineInstance }) {
         style={{ pointerEvents: 'none' }}
       >
         <span
-          className={`whitespace-nowrap text-[11px] px-1.5 py-0.5 rounded-sm border bg-[rgb(28_27_25/85%)] ${
-            selected ? 'border-accent text-fg' : 'border-border text-muted'
-          }`}
+          className={`whitespace-nowrap text-[11px] px-1.5 py-0.5 rounded-sm border ${
+            lit ? 'bg-[rgb(26_25_23/85%)]' : 'bg-[rgb(28_27_25/85%)]'
+          } ${selected ? 'border-accent text-fg' : 'border-border text-muted'}`}
         >
           <span className="mono font-semibold text-fg">{inst.tagPrefix}</span>{' '}
           {entry?.name ?? '설비 없음'}
@@ -444,8 +530,8 @@ function Flows({ doc }: { doc: Factory }) {
         const L = Math.hypot(dx, dy) || 1;
         const ux = dx / L;
         const uy = dy / L;
-        const tip: [number, number, number] = [b[0] - ux * 300, b[1] - uy * 300, 60];
         const z = 60;
+        const tip: [number, number, number] = [b[0] - ux * 300, b[1] - uy * 300, z];
         return (
           <group key={f.id}>
             <Line

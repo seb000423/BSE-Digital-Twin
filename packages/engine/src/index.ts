@@ -34,3 +34,9 @@ export {
   DEFAULT_SHELL,
   type ShellOptions,
 } from './editor/factory-templates.js';
+export {
+  FactoryRuntime,
+  type MachineSim,
+  type MachineKpi,
+  type MachineStatus,
+} from './runtime/factory-runtime.js';

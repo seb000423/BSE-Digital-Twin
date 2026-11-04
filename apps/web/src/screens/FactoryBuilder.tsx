@@ -1,15 +1,14 @@
 /**
- * 공장 편집기 (13 화면 지도 C-공장, 팩토리빌더 1차): 위 작업줄 → 왼쪽 건물·설비 카드 → 가운데 3D → 오른쪽 속성 → 아래 설비 표·흐름·명령 기록.
+ * 공장 편집기 (13 화면 지도 C-공장, 팩토리빌더 1차): 위 작업줄 → 왼쪽 건물·설비 카드·놓인 설비 → 가운데 3D → 오른쪽 속성·흐름.
  * 머신빌더와 같은 틀. 공장 외형(바닥·벽·기둥·지붕·문)과 내부(설비 배치·흐름)를 편집한다. 모든 변경은 명령.
  */
 import { useRef, useState } from 'react';
 import { FactoryViewport } from '../three/FactoryViewport.js';
-import { Dock } from '../panels/Dock.js';
 import { XrayToggle } from '../panels/XrayToggle.js';
 import {
   BuildingPanel,
   CardsPanel,
-  FactoryBottom,
+  FlowPanel,
   FactoryProperties,
 } from '../panels/FactoryPanels.js';
 import { floorSize, useFactory } from '../store-factory.js';
@@ -91,15 +90,18 @@ export function FactoryBuilder() {
           ↷ 다시 실행
         </button>
         <span className="w-px h-5 bg-border mx-1.5" />
-        <button
-          type="button"
-          className="btn"
-          aria-pressed={roof}
-          onClick={() => setRoof(!roof)}
-          title="지붕을 얹어 외형을 보거나, 걷어서 안을 봅니다 (보기만 바뀜)"
+        <label
+          className={`btn gap-1.5 cursor-pointer ${roof ? 'border-accent text-accent' : ''}`}
+          title="켜면 지붕을 얹어 외형을 보고, 끄면 걷어서 안을 봅니다 (보기만 바뀜)"
         >
-          지붕 {roof ? '얹음' : '걷음'}
-        </button>
+          <input
+            type="checkbox"
+            className="accent-[#f2a93b] m-0"
+            checked={roof}
+            onChange={(e) => setRoof(e.target.checked)}
+          />
+          지붕 {roof ? '켜짐' : '꺼짐'}
+        </label>
         <span className="w-px h-5 bg-border mx-1.5" />
         <span className="text-dim">
           설비를 누른 채 끌면 옮겨집니다 (100 mm) · 벽·기둥·문은 누르면 선택 · 빈 곳을 끌면 화면
@@ -119,17 +121,14 @@ export function FactoryBuilder() {
           <CardsPanel />
         </aside>
         <section className="flex-1 min-w-0 relative">
-          <FactoryViewport xray={xray} />
+          <FactoryViewport look={xray ? 'lines' : 'solid'} mode="edit" />
           <XrayToggle xray={xray} onChange={setXray} />
         </section>
-        <aside className="pane w-[300px] shrink-0 border-l border-border overflow-auto">
+        <aside className="pane w-[320px] shrink-0 border-l border-border overflow-auto">
           <FactoryProperties />
+          <FlowPanel />
         </aside>
       </div>
-
-      <Dock>
-        <FactoryBottom />
-      </Dock>
     </main>
   );
 }
